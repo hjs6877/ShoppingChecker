@@ -3,6 +3,8 @@ package com.soom.shoppingchecker;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,9 +14,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +43,40 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        Button btnFetchMenu = (Button) findViewById(R.id.btnFetchMenu);
+        btnFetchMenu.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Fetch menu!", Toast.LENGTH_SHORT).show();
+
+                Menu menu = navigationView.getMenu();
+                for(int i=0; i < menu.size(); i++){
+                    MenuItem menuItem = menu.getItem(i);
+                    Log.i("Fetch menu", "title: " + menuItem.getTitle());
+                    Log.i("Fetch menu", "order: " + String.valueOf(menuItem.getOrder()));
+                }
+            }
+        });
+
+        Button btnAddSubmenu = (Button) findViewById(R.id.btnAddSubmenu);
+        btnAddSubmenu.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Add Submenu!", Toast.LENGTH_SHORT).show();
+
+                Menu menu = navigationView.getMenu();
+                SubMenu subMenu = menu.addSubMenu(100, 1000, 0, "쇼핑리스트");
+//                subMenu.add("서브메뉴1");
+//                subMenu.add("서브메뉴2");
+            }
+        });
+
+
     }
 
     @Override
