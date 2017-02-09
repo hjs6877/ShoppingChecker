@@ -46,35 +46,35 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Button btnFetchMenu = (Button) findViewById(R.id.btnFetchMenu);
-        btnFetchMenu.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Fetch menu!", Toast.LENGTH_SHORT).show();
-
-                Menu menu = navigationView.getMenu();
-                for(int i=0; i < menu.size(); i++){
-                    MenuItem menuItem = menu.getItem(i);
-                    Log.i("Fetch menu", "title: " + menuItem.getTitle());
-                    Log.i("Fetch menu", "order: " + String.valueOf(menuItem.getOrder()));
-                }
-            }
-        });
-
-        Button btnAddSubmenu = (Button) findViewById(R.id.btnAddSubmenu);
-        btnAddSubmenu.setOnClickListener(new View.OnClickListener(){
-
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Add Submenu!", Toast.LENGTH_SHORT).show();
-
-                Menu menu = navigationView.getMenu();
-                SubMenu subMenu = menu.addSubMenu(100, 1000, 0, "쇼핑리스트");
+//        Button btnFetchMenu = (Button) findViewById(R.id.btnFetchMenu);
+//        btnFetchMenu.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(getApplicationContext(), "Fetch menu!", Toast.LENGTH_SHORT).show();
+//
+//                Menu menu = navigationView.getMenu();
+//                for(int i=0; i < menu.size(); i++){
+//                    MenuItem menuItem = menu.getItem(i);
+//                    Log.i("Fetch menu", "title: " + menuItem.getTitle());
+//                    Log.i("Fetch menu", "order: " + String.valueOf(menuItem.getOrder()));
+//                }
+//            }
+//        });
+//
+//        Button btnAddSubmenu = (Button) findViewById(R.id.btnAddSubmenu);
+//        btnAddSubmenu.setOnClickListener(new View.OnClickListener(){
+//
+//            @Override
+//            public void onClick(View v) {
+//                Toast.makeText(getApplicationContext(), "Add Submenu!", Toast.LENGTH_SHORT).show();
+//
+//                Menu menu = navigationView.getMenu();
+//                SubMenu subMenu = menu.addSubMenu(100, 1000, 0, "쇼핑리스트");
 //                subMenu.add("서브메뉴1");
 //                subMenu.add("서브메뉴2");
-            }
-        });
+//            }
+//        });
 
 
     }

@@ -1,20 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:layout_width="match_parent"
+<RelativeLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView
+        android:id="@+id/emptyItemTxt"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/txt_empty_item"
+        android:textColor="#747070"
+        android:textSize="15dp"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="80dp"/>
 
-    <Button
-        android:id="@+id/btnFetchMenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="메뉴 조회"
-        android:layout_marginTop="60dp"/>
-    <Button
-        android:id="@+id/btnAddSubmenu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="서브 메뉴 추가"
-        android:layout_marginTop="60dp"/>
+    <!-- RelativeLayout에서는 스크롤바가 생기지 않으므로, LinearLayout으로 감싸줘야 함 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/emptyItemTxt">
+        <ListView
+            android:id="@+id/itemListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="60dp"/>
+    </LinearLayout>
 
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:background="#ffffff">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#cacbcf"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"></LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="6">
+            <EditText
+                android:id="@+id/editItemText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="@string/txt_input_item"
+                android:textSize="20dp"
+                android:layout_weight="5"/>
+            <Button
+                android:id="@+id/buttonAdd"
+                android:layout_width="10dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@xml/button_add_item_selector"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--<Button-->
+        <!--android:id="@+id/btnFetchMenu"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="메뉴 조회"-->
+        <!--android:layout_marginTop="60dp"/>-->
+    <!--<Button-->
+        <!--android:id="@+id/btnAddSubmenu"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="서브 메뉴 추가"-->
+        <!--android:layout_marginTop="60dp"/>-->
+</RelativeLayout>
