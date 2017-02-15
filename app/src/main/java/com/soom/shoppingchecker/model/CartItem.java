@@ -2,38 +2,29 @@ package com.soom.shoppingchecker.model;
 
 import java.io.Serializable;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by kjs on 2016-12-08.
  */
 
-public class CartItem implements Serializable {
+public class CartItem extends RealmObject implements Serializable{
+    @PrimaryKey
     private int regId;
-    private int isChecked;
-    private int isPurchased;
     private String itemText;
+    private boolean isChecked;
+    private boolean isPurchased;
     private String createDate;
     private String updateDate;
+    private Cart cart;
 
-    public CartItem(int regId, int isChecked, int isPurchased,
-                    String itemText, String createDate, String updateDate) {
-        this.regId = regId;
-        this.isChecked = isChecked;
-        this.isPurchased = isPurchased;
-        this.itemText = itemText;
-        this.createDate = createDate;
-        this.updateDate = updateDate;
-    }
-
-    public int getRegId(){
+    public int getRegId() {
         return regId;
     }
 
-    public int isChecked() {
-        return isChecked;
-    }
-
-    public void setChecked(int checked) {
-        isChecked = checked;
+    public void setRegId(int regId) {
+        this.regId = regId;
     }
 
     public String getItemText() {
@@ -44,11 +35,19 @@ public class CartItem implements Serializable {
         this.itemText = itemText;
     }
 
-    public int isPurchased() {
+    public boolean isChecked() {
+        return isChecked;
+    }
+
+    public void setChecked(boolean checked) {
+        isChecked = checked;
+    }
+
+    public boolean isPurchased() {
         return isPurchased;
     }
 
-    public void setPurchased(int purchased) {
+    public void setPurchased(boolean purchased) {
         isPurchased = purchased;
     }
 
@@ -68,14 +67,11 @@ public class CartItem implements Serializable {
         this.updateDate = updateDate;
     }
 
-    public Object[] getCartItemDataArray(){
-        Object[] cartItemData = {
-                this.regId,
-                this.isChecked,
-                this.isPurchased,
-                this.itemText
-        };
+    public Cart getCart() {
+        return cart;
+    }
 
-        return cartItemData;
+    public void setCart(Cart cart) {
+        this.cart = cart;
     }
 }

@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import io.realm.Realm;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private NavigationView navigationView;
@@ -142,6 +144,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initActivity() {
+        // Realm을 초기화합니다.
+        Realm.init(this);
+
         // 앱바 추가
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -273,7 +278,7 @@ public class MainActivity extends AppCompatActivity
      * @return
      */
     private List<CartItem> getCartItemList() {
-        return cartItemService.selectAll(SQLData.SQL_SELECT_ALL_ITEM);
+        return cartItemService.findAllCartItemByCart(SQLData.SQL_SELECT_ALL_ITEM);
     }
 
     private void setEmptyItemTxt() {
@@ -290,7 +295,7 @@ public class MainActivity extends AppCompatActivity
         }
         for(Map.Entry<Integer, CartItem> map : checkedItemMap.entrySet()){
             CartItem cartItem = map.getValue();
-            cartItemService.deleteData(SQLData.SQL_DELETE_ITEM, cartItem.getRegId());
+            cartItemService.deleteCartItem(SQLData.SQL_DELETE_ITEM, cartItem.getRegId());
         }
         adapter.removeItems(checkedItemMap);
         Toast.makeText(this, R.string.toast_deleted_item, Toast.LENGTH_SHORT).show();
@@ -322,7 +327,7 @@ public class MainActivity extends AppCompatActivity
                 String currentDate = DateUtil.currentDateToString();
 
                 // max reg_id를 조회한다.
-                int maxRegId = cartItemService.selectMaxRegId(SQLData.SQL_SELECT_MAX_REG_ID);
+                int maxRegId = cartItemService.findMaxCartItemRegIdByCart(SQLData.SQL_SELECT_MAX_REG_ID);
                 int regId = maxRegId + 1;
 
                 insertItem(regId, itemText, currentDate);
@@ -334,12 +339,12 @@ public class MainActivity extends AppCompatActivity
 
         private void insertItem(int regId, String itemText, String currentDate) {
             // DB에 아이템 추가
-            cartItemService.insertCartItem(SQLData.SQL_INSERT_ITEM, new CartItem(regId, 0, 0, itemText,currentDate, currentDate));
+            cartItemService.insertCartItem(SQLData.SQL_INSERT_ITEM, new CartItem());
         }
 
         private void refreshCartItems(int regId, String itemText, String currentDate) {
             // 리스트뷰에 아이템 추가 및 갱신
-            adapter.addItem(new CartItem(regId, 0, 0, itemText, currentDate, currentDate));
+            adapter.addItem(new CartItem());
             Collections.sort(adapter.getCartItemList(), new CartItemComparator());
             adapter.notifyDataSetChanged();
 

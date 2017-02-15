@@ -1,6 +1,12 @@
 apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
+repositories {
+    maven {
+        url 'https://github.com/uPhyca/stetho-realm/raw/master/maven-repo'
+    }
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion "25.0.0"
@@ -31,4 +37,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    compile group: 'com.facebook.stetho', name: 'stetho', version: '1.4.2'
+    compile group: 'com.facebook.stetho', name: 'stetho-okhttp', version: '1.4.2'
+    compile 'com.uphyca:stetho_realm:2.0.0'
 }

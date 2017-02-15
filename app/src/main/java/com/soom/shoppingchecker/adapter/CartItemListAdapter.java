@@ -204,15 +204,15 @@ public class CartItemListAdapter extends BaseAdapter {
     }
 
     private String getButtonText(CartItem cartItem) {
-        return cartItem.isPurchased() == 1 ? "구매완료" : "구매전";
+        return cartItem.isPurchased() ? "구매완료" : "구매전";
     }
 
     private boolean isChecked(CartItem cartItem) {
-        return cartItem.isChecked() == 1 ? true : false;
+        return cartItem.isChecked() ? true : false;
     }
 
     private boolean isPurchased(CartItem cartItem) {
-        return cartItem.isPurchased() == 1 ? true : false;
+        return cartItem.isPurchased() ? true : false;
     }
 
     /**
@@ -238,7 +238,7 @@ public class CartItemListAdapter extends BaseAdapter {
                 checkedItemMap.remove(regId);
 
             cartItemService.updateIsChecked(SQLData.SQL_UPDATE_IS_CHECKED, regId, DataTypeUtils.convertBooleanToInt(isChecked));
-            cartItemList.get(position).setChecked(DataTypeUtils.convertBooleanToInt(isChecked));
+            cartItemList.get(position).setChecked(isChecked);
         }
     }
 
@@ -270,13 +270,12 @@ public class CartItemListAdapter extends BaseAdapter {
         public void onClick(View v) {
             CartItem cartItem = getItem(position);
 
-            boolean isPurchased = DataTypeUtils.convertIntToBoolean(cartItem.isPurchased());
             int regId = cartItem.getRegId();
             boolean purchasedStauts;
             String buttonText;
             int buttonColor;
 
-            if(isPurchased){
+            if(cartItem.isPurchased()){
                 purchasedStauts = false;
                 buttonText = "구매전";
                 buttonColor = DEFAULT_ITEM_TEXT_COLOR;
@@ -291,7 +290,7 @@ public class CartItemListAdapter extends BaseAdapter {
 
             // TODO 쓰레드 전환 검토.
             cartItemService.updateIsPurchased(SQLData.SQL_UPDATE_IS_PURCHASED, regId, DataTypeUtils.convertBooleanToInt(purchasedStauts));
-            cartItemList.get(position).setPurchased(DataTypeUtils.convertBooleanToInt(purchasedStauts));
+            cartItemList.get(position).setPurchased(purchasedStauts);
         }
     }
 }
