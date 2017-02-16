@@ -21,7 +21,7 @@ public class Cart extends RealmObject{
 
     public Cart(){}
 
-    public Cart(int cartId, String cartName, Date createDate, Date updateDate) {
+    public Cart(long cartId, String cartName, Date createDate, Date updateDate) {
         this.cartId = cartId;
         this.cartName = cartName;
         this.createDate = createDate;

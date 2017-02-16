@@ -14,6 +14,8 @@ import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.service.CartService;
 
+import java.util.Date;
+
 public class CartCreateActivity extends AppCompatActivity {
     private EditText editCreateCartText;
     private Button buttonCreateCart;
@@ -46,7 +48,7 @@ public class CartCreateActivity extends AppCompatActivity {
     }
 
     /**
-     * 아이템 수정 버튼 클릭 리스너
+     * 쇼핑 목록(카트) 생성 버튼 클릭 리스너
      */
     private class CartTextCreateButtonClickListener implements View.OnClickListener {
 
@@ -62,7 +64,16 @@ public class CartCreateActivity extends AppCompatActivity {
              * - max cartId를 가져온다.
              * - new cartId = 조회한 max cartId + 1
              * - 저장.
+             * - 저장되었는지 확인 테스트 TODO
+             * - 팝업 액티비티 닫기 TODO
+             * - CartItemListAdapter를 통해 저장된 Cart에 해당하는 cart Item을 listviw에 가져와서 표시. TODO
+             *      - 액티비티를 닫을 때, cartId를 응답으로 전달
+             *      - 응답으로 전달 받은 cartId에 해당하는 Cart Item을 조회하여 adapter를 갱신. 기존 arrayList를 clear하고 갱신한다.
              */
+            long maxCartId = cartService.findMaxCartId();
+            long cartId = maxCartId + 1;
+            Cart cart = new Cart(cartId, cartName, new Date(), new Date());
+            cartService.saveCart(cart);
         }
     }
 
