@@ -1,5 +1,6 @@
 package com.soom.shoppingchecker;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -158,13 +159,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+        fab.setOnClickListener(new FloatingActionButtonClickListener(this));
 
     }
 
@@ -373,6 +368,22 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra("position", position);
             startActivityForResult(intent, REQUEST_CODE_ITEMMODIFY);
             return false;
+        }
+    }
+
+    private class FloatingActionButtonClickListener implements View.OnClickListener {
+        private Context context;
+
+        public FloatingActionButtonClickListener(Context context){
+            this.context = context;
+        }
+
+        @Override
+        public void onClick(View view) {
+            Log.d("FABClickListener", "Floating Action Button Click!!");
+
+            Intent intent = new Intent(context, CartCreateActivity.class);
+            startActivity(intent);
         }
     }
 }

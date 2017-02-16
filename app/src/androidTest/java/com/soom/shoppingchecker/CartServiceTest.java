@@ -46,4 +46,13 @@ public class CartServiceTest {
         Log.i("CartServiceTest", "cart name: " + realmCart.getCartName());
         assertEquals("test Cart4", realmCart.getCartName());
     }
+
+    @Test
+    public void findMaxCartIdTest(){
+        CartService cartService = new CartService();
+        cartService.deleteAllCart();
+        long maxId = cartService.findMaxCartId();
+
+        assertEquals(1, maxId);
+    }
 }

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.soom.shoppingchecker" >
+    package="com.soom.shoppingchecker">
 
     <application
+        android:name=".application.ShoppingCheckerApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".application.ShoppingCheckerApplication">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -20,8 +20,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ItemModifyActivity"
-            android:theme="@style/Theme.MyDialog"></activity>
+        <activity
+            android:name=".ItemModifyActivity"
+            android:theme="@style/Theme.MyDialog" />
+        <activity android:name=".CartCreateActivity"
+            android:theme="@style/Theme.MyDialog" />
     </application>
 
 </manifest>
