@@ -28,6 +28,7 @@ import com.soom.shoppingchecker.adapter.CartItemListAdapter;
 import com.soom.shoppingchecker.comparator.CartItemComparator;
 import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
+import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.utils.DateUtil;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -53,6 +55,8 @@ public class MainActivity extends AppCompatActivity
     private TextView emptyItemTxt;
 
     private CartItemListAdapter adapter;
+    private RealmResults<Cart> carts;
+    private Realm realm = Realm.getDefaultInstance();
 
     public MainActivity(){
         dbController = new DBController(this);
@@ -72,8 +76,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+
 
 //        Button btnFetchMenu = (Button) findViewById(R.id.btnFetchMenu);
 //        btnFetchMenu.setOnClickListener(new View.OnClickListener() {
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity
 //                Toast.makeText(getApplicationContext(), "Add Submenu!", Toast.LENGTH_SHORT).show();
 //
 //                Menu menu = navigationView.getMenu();
-//                SubMenu subMenu = menu.addSubMenu(100, 1000, 0, "쇼핑리스트");
+//                SubMenu subMenu = menu.addSubMenu(100, 1000, 0, "Shopping list");
 //                subMenu.add("서브메뉴1");
 //                subMenu.add("서브메뉴2");
 //            }
@@ -164,6 +167,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initViews() {
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        createShoppingListMenu();
+
+        // TODO 디폴트 쇼핑 리스트의 쇼핑 아이템을 리스트에 담아야 한다.
         List<CartItem> cartItemList = getCartItemList();
 
         // 리스트뷰에 어댑터 연결.
@@ -183,7 +192,6 @@ public class MainActivity extends AppCompatActivity
 
         setEmptyItemTxt();
     }
-
 
 
     @Override
@@ -298,6 +306,19 @@ public class MainActivity extends AppCompatActivity
         setEmptyItemTxt();
     }
 
+    private void createShoppingListMenu() {
+        Menu menu = navigationView.getMenu();
+
+        SubMenu subMenu = menu.addSubMenu(100, 1000, 0, R.string.txt_shopping_list);
+
+        // 쇼핑 목록을 조회하여 Shopping list의 서브메뉴에 추가한다.
+        carts = realm.where(Cart.class).findAll();
+        for(Cart cart : carts){
+            MenuItem menuItem = subMenu.add(cart.getCartName());
+            menuItem.setIcon(R.drawable.ic_shopping_basket);
+        }
+
+    }
     /**
      * 아이템 추가 버튼 클릭 리스너
      */
