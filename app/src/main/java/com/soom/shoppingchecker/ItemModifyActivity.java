@@ -28,7 +28,7 @@ public class ItemModifyActivity extends AppCompatActivity {
 
     public ItemModifyActivity() {
         dbController = new DBController(this);
-        cartItemService = new CartItemService(dbController);
+        cartItemService = new CartItemService();
     }
 
     @Override
@@ -73,7 +73,8 @@ public class ItemModifyActivity extends AppCompatActivity {
         private void updateCartItem(){
             String modifiedItemText = editModifyItemText.getEditableText().toString();
             cartItem.setItemText(modifiedItemText);
-            cartItemService.updateCartItem(SQLData.SQL_UPDATE_ITEM, cartItem);
+            // TODO Realm 전환
+//            cartItemService.updateCartItem(SQLData.SQL_UPDATE_ITEM, cartItem);
         }
 
         /**

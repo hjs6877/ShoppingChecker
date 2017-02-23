@@ -24,9 +24,12 @@ public class CartService {
     }
 
     public List<Cart> findAllCart(){
-        return null;
+        return realm.where(Cart.class).findAll();
     }
 
+    public Cart findOneCartByCartId(long cartId){
+        return realm.where(Cart.class).equalTo("cartId", cartId).findFirst();
+    }
     public void deleteCartByCartId(final Cart cart){
        realm.executeTransaction(new Realm.Transaction() {
            @Override
@@ -57,4 +60,5 @@ public class CartService {
 
         return maxId;
     }
+
 }

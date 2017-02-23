@@ -1,6 +1,7 @@
 package com.soom.shoppingchecker.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
@@ -11,20 +12,31 @@ import io.realm.annotations.PrimaryKey;
 
 public class CartItem extends RealmObject implements Serializable{
     @PrimaryKey
-    private int regId;
+    private long cartItemId;
     private String itemText;
     private boolean isChecked;
     private boolean isPurchased;
-    private String createDate;
-    private String updateDate;
-    private Cart cart;
+    private Date createDate;
+    private Date updateDate;
 
-    public int getRegId() {
-        return regId;
+    public CartItem(){}
+
+    public CartItem(long cartItemId, String itemText, boolean isChecked, boolean isPurchased,
+                    Date createDate, Date updateDate) {
+        this.cartItemId = cartItemId;
+        this.itemText = itemText;
+        this.isChecked = isChecked;
+        this.isPurchased = isPurchased;
+        this.createDate = createDate;
+        this.updateDate = updateDate;
     }
 
-    public void setRegId(int regId) {
-        this.regId = regId;
+    public long getCartItemId() {
+        return cartItemId;
+    }
+
+    public void setCartItemId(int cartItemId) {
+        this.cartItemId = cartItemId;
     }
 
     public String getItemText() {
@@ -51,27 +63,19 @@ public class CartItem extends RealmObject implements Serializable{
         isPurchased = purchased;
     }
 
-    public String getCreateDate() {
+    public Date getCreateDate() {
         return createDate;
     }
 
-    public void setCreateDate(String createDate) {
+    public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
 
-    public String getUpdateDate() {
+    public Date getUpdateDate() {
         return updateDate;
     }
 
-    public void setUpdateDate(String updateDate) {
+    public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
-    }
-
-    public Cart getCart() {
-        return cart;
-    }
-
-    public void setCart(Cart cart) {
-        this.cart = cart;
     }
 }

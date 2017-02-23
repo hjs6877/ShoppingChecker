@@ -46,7 +46,7 @@ public class CartItemListAdapter extends BaseAdapter {
         Button itemPurchasedButton;
     }
     private List<CartItem> cartItemList;
-    private Map<Integer, CartItem> checkedItemMap;
+    private Map<Long, CartItem> checkedItemMap;
     private LayoutInflater inflater;
     private DBController dbController;
     private CartItemService cartItemService;
@@ -56,7 +56,7 @@ public class CartItemListAdapter extends BaseAdapter {
         this.cartItemList = cartItemList;
         checkedItemMap = new HashMap<>();
         this.dbController = dbController;
-        cartItemService = new CartItemService(dbController);
+        cartItemService = new CartItemService();
     }
 
     public void setCartItemList(List<CartItem> cartItemList) {
@@ -80,7 +80,7 @@ public class CartItemListAdapter extends BaseAdapter {
      *
      * @return
      */
-    public Map<Integer, CartItem> getCheckedItemMap(){
+    public Map<Long, CartItem> getCheckedItemMap(){
         return this.checkedItemMap;
     }
 
@@ -227,7 +227,7 @@ public class CartItemListAdapter extends BaseAdapter {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             CartItem cartItem = cartItemList.get(position);
-            int regId = cartItem.getRegId();
+            long regId = cartItem.getCartItemId();
 
             /**
              * checked 아이템을 컬렉션에 담고, unchecked 아이템은 컬렉션에서 제거한다.
@@ -237,7 +237,8 @@ public class CartItemListAdapter extends BaseAdapter {
             else
                 checkedItemMap.remove(regId);
 
-            cartItemService.updateIsChecked(SQLData.SQL_UPDATE_IS_CHECKED, regId, DataTypeUtils.convertBooleanToInt(isChecked));
+                // TODO Realm으로 변경 필요.
+//            cartItemService.updateIsChecked(SQLData.SQL_UPDATE_IS_CHECKED, regId, DataTypeUtils.convertBooleanToInt(isChecked));
             cartItemList.get(position).setChecked(isChecked);
         }
     }
@@ -270,7 +271,7 @@ public class CartItemListAdapter extends BaseAdapter {
         public void onClick(View v) {
             CartItem cartItem = getItem(position);
 
-            int regId = cartItem.getRegId();
+            long regId = cartItem.getCartItemId();
             boolean purchasedStauts;
             String buttonText;
             int buttonColor;
@@ -288,8 +289,8 @@ public class CartItemListAdapter extends BaseAdapter {
             viewHolder.itemPurchasedButton.setText(buttonText);
             viewHolder.itemTextView.setTextColor(buttonColor);
 
-            // TODO 쓰레드 전환 검토.
-            cartItemService.updateIsPurchased(SQLData.SQL_UPDATE_IS_PURCHASED, regId, DataTypeUtils.convertBooleanToInt(purchasedStauts));
+            // TODO Realm으로 변경 필요.
+//            cartItemService.updateIsPurchased(SQLData.SQL_UPDATE_IS_PURCHASED, regId, DataTypeUtils.convertBooleanToInt(purchasedStauts));
             cartItemList.get(position).setPurchased(purchasedStauts);
         }
     }

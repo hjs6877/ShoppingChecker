@@ -1,11 +1,9 @@
 package com.soom.shoppingchecker;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.SubMenu;
 import android.view.View;
@@ -31,14 +29,15 @@ import com.soom.shoppingchecker.database.SQLData;
 import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
+import com.soom.shoppingchecker.service.CartService;
 import com.soom.shoppingchecker.utils.DateUtil;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import io.realm.Realm;
-import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -48,6 +47,7 @@ public class MainActivity extends AppCompatActivity
 
     private ListView itemListView;
     private DBController dbController;
+    private CartService cartService;
     private CartItemService cartItemService;
 
     private Button buttonAdd;
@@ -55,12 +55,13 @@ public class MainActivity extends AppCompatActivity
     private TextView emptyItemTxt;
 
     private CartItemListAdapter adapter;
-    private RealmResults<Cart> carts;
+    private List<Cart> carts;
     private Realm realm = Realm.getDefaultInstance();
 
     public MainActivity(){
         dbController = new DBController(this);
-        cartItemService = new CartItemService(dbController);
+        cartService = new CartService();
+        cartItemService = new CartItemService();
     }
 
     @Override
@@ -172,12 +173,12 @@ public class MainActivity extends AppCompatActivity
 
         createShoppingListMenu();
 
-        // TODO 디폴트 쇼핑 리스트의 쇼핑 아이템을 리스트에 담아야 한다.
-        List<CartItem> cartItemList = getCartItemList();
+        // 디폴트 쇼핑 리스트의 쇼핑 아이템 조회.
+        Cart defaultCart = cartService.findOneCartByCartId(1);
 
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
-        adapter = new CartItemListAdapter(this, cartItemList, dbController);
+        adapter = new CartItemListAdapter(this, defaultCart.getCartItems(), dbController);
         itemListView.setAdapter(adapter);
 
         // 아이템 long click 시, 아이템 수정을 위한 리스너 등록
@@ -185,6 +186,7 @@ public class MainActivity extends AppCompatActivity
 
         // 아이템 입력을 위한 이벤트 리스너 등록.
         editItemText = (EditText) findViewById(R.id.editItemText);
+        editItemText.setTag(R.string.key_cartId, defaultCart.getCartId());
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
         buttonAdd.setOnClickListener(new ItemAddClickListener(this));
 
@@ -193,6 +195,23 @@ public class MainActivity extends AppCompatActivity
         setEmptyItemTxt();
     }
 
+    /**
+     * 쇼핑 목록을 조회하여 서브 메뉴로 추가한다.
+     */
+    private void createShoppingListMenu() {
+        carts = cartService.findAllCart();
+
+        Menu menu = navigationView.getMenu();
+
+        SubMenu subMenu = menu.addSubMenu(100, 1000, 0, R.string.txt_shopping_list);
+
+
+        for(Cart cart : carts){
+            MenuItem menuItem = subMenu.add(cart.getCartName());
+            menuItem.setIcon(R.drawable.ic_shopping_basket);
+        }
+
+    }
 
     @Override
     public void onBackPressed() {
@@ -213,7 +232,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Map<Integer, CartItem> checkedItemMap = adapter.getCheckedItemMap();
+        Map<Long, CartItem> checkedItemMap = adapter.getCheckedItemMap();
 
         switch (item.getItemId()){
             /**
@@ -222,7 +241,8 @@ public class MainActivity extends AppCompatActivity
              * - item 갱신
              */
             case R.id.action_item_delete:
-                deleteCartItem(checkedItemMap);
+                // TODO Realm 전환.
+//                deleteCartItem(checkedItemMap);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -275,14 +295,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * 아이템 조회
-     *
-     * @return
-     */
-    private List<CartItem> getCartItemList() {
-        return cartItemService.findAllCartItemByCart(SQLData.SQL_SELECT_ALL_ITEM);
-    }
 
     private void setEmptyItemTxt() {
         if(adapter.getCartItemList().size() > 0)
@@ -298,7 +310,8 @@ public class MainActivity extends AppCompatActivity
         }
         for(Map.Entry<Integer, CartItem> map : checkedItemMap.entrySet()){
             CartItem cartItem = map.getValue();
-            cartItemService.deleteCartItem(SQLData.SQL_DELETE_ITEM, cartItem.getRegId());
+            // TODO Realm 전환.
+//            cartItemService.deleteCartItem(SQLData.SQL_DELETE_ITEM, cartItem.getCartItemId());
         }
         adapter.removeItems(checkedItemMap);
         Toast.makeText(this, R.string.toast_deleted_item, Toast.LENGTH_SHORT).show();
@@ -306,19 +319,6 @@ public class MainActivity extends AppCompatActivity
         setEmptyItemTxt();
     }
 
-    private void createShoppingListMenu() {
-        Menu menu = navigationView.getMenu();
-
-        SubMenu subMenu = menu.addSubMenu(100, 1000, 0, R.string.txt_shopping_list);
-
-        // 쇼핑 목록을 조회하여 Shopping list의 서브메뉴에 추가한다.
-        carts = realm.where(Cart.class).findAll();
-        for(Cart cart : carts){
-            MenuItem menuItem = subMenu.add(cart.getCartName());
-            menuItem.setIcon(R.drawable.ic_shopping_basket);
-        }
-
-    }
     /**
      * 아이템 추가 버튼 클릭 리스너
      */
@@ -337,31 +337,47 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View v) {
             String itemText = editItemText.getEditableText().toString();
+            long cartId = (long) editItemText.getTag(R.string.key_cartId);
+
             if(itemText.isEmpty()){
                 Toast.makeText(context, R.string.toast_no_input_item, Toast.LENGTH_SHORT).show();
             }else{
-                String currentDate = DateUtil.currentDateToString();
+                // max cartItem ID를 조회한다.
+                // TODO 리팩토링 - 메서드 추출.
+                List<CartItem> cartItems = cartService.findOneCartByCartId(cartId).getCartItems();
+                long maxCartItemId = 0;
+                for(CartItem cartItem : cartItems){
+                    long max = cartItem.getCartItemId();
+                    if(max > maxCartItemId)
+                        maxCartItemId = max;
+                }
 
-                // max reg_id를 조회한다.
-                int maxRegId = cartItemService.findMaxCartItemRegIdByCart(SQLData.SQL_SELECT_MAX_REG_ID);
-                int regId = maxRegId + 1;
+                long cartItemId = maxCartItemId + 1;
 
-                insertItem(regId, itemText, currentDate);
-                refreshCartItems(regId, itemText, currentDate);
+                insertItem(cartId, cartItemId, itemText);
+                refreshCartItems(cartId);
                 setEmptyItemTxt();
             }
 
         }
 
-        private void insertItem(int regId, String itemText, String currentDate) {
-            // DB에 아이템 추가
-            cartItemService.insertCartItem(SQLData.SQL_INSERT_ITEM, new CartItem());
+        private Cart insertItem(long cartId, long cartItemId, String itemText) {
+            realm.beginTransaction();
+            Cart cart = cartService.findOneCartByCartId(cartId);
+            CartItem cartItem = new CartItem(cartItemId, itemText, false, false, new Date(), new Date());
+            cart.getCartItems().add(realm.copyToRealm(cartItem));
+            realm.commitTransaction();
+            return cart;
         }
 
-        private void refreshCartItems(int regId, String itemText, String currentDate) {
-            // 리스트뷰에 아이템 추가 및 갱신
-            adapter.addItem(new CartItem());
-            Collections.sort(adapter.getCartItemList(), new CartItemComparator());
+        private void refreshCartItems(long cartId) {
+            // TODO cartItem의 날짜 순대로 sort되면 쿼리에서 sort하고 안되면 트랜잭션으로 묶어서 테스트
+            List<CartItem> cartItems = cartService.findOneCartByCartId(cartId).getCartItems();
+            adapter.setCartItemList(cartItems);
+            realm.beginTransaction();
+            Collections.sort(cartItems, new CartItemComparator());
+            realm.commitTransaction();
+
             adapter.notifyDataSetChanged();
 
             // editText의 텍스트 지워서 초기화.
