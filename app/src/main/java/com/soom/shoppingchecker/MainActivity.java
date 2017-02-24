@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity
 
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
-        adapter = new CartItemListAdapter(this, defaultCart.getCartItems(), dbController);
+        adapter = new CartItemListAdapter(this, defaultCart.getCartItems());
         itemListView.setAdapter(adapter);
 
         // 아이템 long click 시, 아이템 수정을 위한 리스너 등록
@@ -343,14 +343,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(context, R.string.toast_no_input_item, Toast.LENGTH_SHORT).show();
             }else{
                 // max cartItem ID를 조회한다.
-                // TODO 리팩토링 - 메서드 추출.
-                List<CartItem> cartItems = cartService.findOneCartByCartId(cartId).getCartItems();
-                long maxCartItemId = 0;
-                for(CartItem cartItem : cartItems){
-                    long max = cartItem.getCartItemId();
-                    if(max > maxCartItemId)
-                        maxCartItemId = max;
-                }
+                long maxCartItemId = cartItemService.findMaxCartItemId();
 
                 long cartItemId = maxCartItemId + 1;
 
@@ -371,7 +364,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         private void refreshCartItems(long cartId) {
-            // TODO cartItem의 날짜 순대로 sort되면 쿼리에서 sort하고 안되면 트랜잭션으로 묶어서 테스트
             List<CartItem> cartItems = cartService.findOneCartByCartId(cartId).getCartItems();
             adapter.setCartItemList(cartItems);
             realm.beginTransaction();

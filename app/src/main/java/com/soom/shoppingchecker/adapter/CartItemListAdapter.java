@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.soom.shoppingchecker.R;
 import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
+import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.utils.DataTypeUtils;
@@ -28,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.realm.Realm;
+
 /**
  * Created by kjs on 2016-12-08.
  * 아이템 데이터를 리스트뷰에 제공해주는 어댑터 클래스
@@ -36,6 +39,7 @@ import java.util.Map;
 public class CartItemListAdapter extends BaseAdapter {
     private final int DEFAULT_ITEM_TEXT_COLOR = Color.parseColor("#000000");
     private final int CLICKED_ITEM_TEXT_COLOR = Color.parseColor("#DCDCDC");
+    private Realm realm = Realm.getDefaultInstance();
 
     /**
      * 리스트 뷰에 아이템으로 표시되는 위젯 객체들을 보관하는 내부 클래스
@@ -48,15 +52,11 @@ public class CartItemListAdapter extends BaseAdapter {
     private List<CartItem> cartItemList;
     private Map<Long, CartItem> checkedItemMap;
     private LayoutInflater inflater;
-    private DBController dbController;
-    private CartItemService cartItemService;
 
-    public CartItemListAdapter(Context context, List<CartItem> cartItemList, DBController dbController) {
+    public CartItemListAdapter(Context context, List<CartItem> cartItemList) {
         inflater = LayoutInflater.from(context);
         this.cartItemList = cartItemList;
         checkedItemMap = new HashMap<>();
-        this.dbController = dbController;
-        cartItemService = new CartItemService();
     }
 
     public void setCartItemList(List<CartItem> cartItemList) {
@@ -170,8 +170,6 @@ public class CartItemListAdapter extends BaseAdapter {
      * @param position
      */
     private void setWidget(ViewHolder viewHolder, int position) {
-
-        // TODO position 값도 파라미터로 넘겨서 CartItemList의 위젯 상태값을 업데이트 하도록 수정하고, 갱신해본다.
         setItemCheckBox(viewHolder, position);
         setItemTextView(viewHolder, position);
         setItemPurchasedButton(viewHolder, position);
@@ -225,21 +223,25 @@ public class CartItemListAdapter extends BaseAdapter {
             this.position = position;
         }
         @Override
-        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        public void onCheckedChanged(CompoundButton buttonView, final boolean isChecked) {
             CartItem cartItem = cartItemList.get(position);
-            long regId = cartItem.getCartItemId();
+            long cartItemId = cartItem.getCartItemId();
 
             /**
              * checked 아이템을 컬렉션에 담고, unchecked 아이템은 컬렉션에서 제거한다.
              */
             if(isChecked)
-                checkedItemMap.put(regId, cartItem);
+                checkedItemMap.put(cartItemId, cartItem);
             else
-                checkedItemMap.remove(regId);
+                checkedItemMap.remove(cartItemId);
 
-                // TODO Realm으로 변경 필요.
-//            cartItemService.updateIsChecked(SQLData.SQL_UPDATE_IS_CHECKED, regId, DataTypeUtils.convertBooleanToInt(isChecked));
+            Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
+            realm.beginTransaction();
+            cart.getCartItems().get(0).setChecked(isChecked);
             cartItemList.get(position).setChecked(isChecked);
+            realm.commitTransaction();
+
+
         }
     }
 
@@ -270,6 +272,7 @@ public class CartItemListAdapter extends BaseAdapter {
         @Override
         public void onClick(View v) {
             CartItem cartItem = getItem(position);
+            long cartItemId = cartItem.getCartItemId();
 
             long regId = cartItem.getCartItemId();
             boolean purchasedStauts;
@@ -289,9 +292,12 @@ public class CartItemListAdapter extends BaseAdapter {
             viewHolder.itemPurchasedButton.setText(buttonText);
             viewHolder.itemTextView.setTextColor(buttonColor);
 
-            // TODO Realm으로 변경 필요.
-//            cartItemService.updateIsPurchased(SQLData.SQL_UPDATE_IS_PURCHASED, regId, DataTypeUtils.convertBooleanToInt(purchasedStauts));
+            Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
+            realm.beginTransaction();
+            cart.getCartItems().get(0).setPurchased(purchasedStauts);
             cartItemList.get(position).setPurchased(purchasedStauts);
+            realm.commitTransaction();
+
         }
     }
 }

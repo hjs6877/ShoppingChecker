@@ -8,6 +8,7 @@ import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.realm.Realm;
 
@@ -18,5 +19,33 @@ import io.realm.Realm;
 public class CartItemService {
     private final String TAG = "CartItemService";
     private Realm realm = Realm.getDefaultInstance();
+    private CartService cartService;
 
+    public CartItemService(){
+        this.cartService = new CartService();
+    }
+    public long findMaxCartItemId(){
+
+        long maxCartItemId = 0;
+        List<Cart> carts = cartService.findAllCart();
+
+        for(Cart cart : carts){
+            long cartItemId = getMaxCartItemIdInCart(cart);
+            if(cartItemId > maxCartItemId)
+                maxCartItemId = cartItemId;
+        }
+
+        return maxCartItemId;
+    }
+
+    private long getMaxCartItemIdInCart(Cart cart) {
+        long maxCartItemId = 0;
+        List<CartItem> cartItems = cart.getCartItems();
+        for(CartItem cartItem : cartItems){
+            long cartItemId = cartItem.getCartItemId();
+            if(cartItemId > maxCartItemId)
+                maxCartItemId = cartItemId;
+        }
+        return maxCartItemId;
+    }
 }

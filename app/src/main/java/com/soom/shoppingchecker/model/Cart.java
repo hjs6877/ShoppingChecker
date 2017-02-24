@@ -1,7 +1,11 @@
 package com.soom.shoppingchecker.model;
 
+import org.parceler.Parcel;
+
+import java.io.Serializable;
 import java.util.Date;
 
+import io.realm.CartRealmProxy;
 import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
@@ -10,8 +14,10 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by kjs on 2017-02-14.
  */
-
-public class Cart extends RealmObject{
+@Parcel(implementations = { CartRealmProxy.class },
+        value = Parcel.Serialization.BEAN,
+        analyze = { Cart.class })
+public class Cart extends RealmObject implements Serializable {
     @PrimaryKey
     private long cartId;
     private String cartName;

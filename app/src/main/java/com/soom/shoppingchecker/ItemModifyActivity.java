@@ -9,8 +9,11 @@ import android.widget.EditText;
 
 import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
+import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
+
+import io.realm.Realm;
 
 
 /**
@@ -23,6 +26,7 @@ public class ItemModifyActivity extends AppCompatActivity {
     private CartItem cartItem;
     private DBController dbController;
     private CartItemService cartItemService;
+    private Realm realm = Realm.getDefaultInstance();
 
     private int position;
 
@@ -72,9 +76,13 @@ public class ItemModifyActivity extends AppCompatActivity {
 
         private void updateCartItem(){
             String modifiedItemText = editModifyItemText.getEditableText().toString();
-            cartItem.setItemText(modifiedItemText);
+            long cartItemId = cartItem.getCartItemId();
+
             // TODO Realm 전환
-//            cartItemService.updateCartItem(SQLData.SQL_UPDATE_ITEM, cartItem);
+            Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
+            realm.beginTransaction();
+            cart.getCartItems().get(0).setItemText(modifiedItemText);
+            realm.commitTransaction();
         }
 
         /**
