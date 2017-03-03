@@ -2,6 +2,7 @@ package com.soom.shoppingchecker;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
@@ -15,9 +16,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,7 +47,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private NavigationView navigationView;
     public static final String TAG = "MainActivity";
-    public static final int REQUEST_CODE_ITEMMODIFY = 1001;
+
+    public static final int REQUEST_CODE_ADD_CART = 1001;
+    public static final int REQUEST_CODE_MODIFY_ITEM = 1002;
 
     private ListView itemListView;
     private DBController dbController;
@@ -149,13 +155,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initActivity() {
-        // Realm을 초기화합니다.
-        Realm.init(this);
-
         // 앱바 추가
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -175,6 +177,7 @@ public class MainActivity extends AppCompatActivity
 
         // 디폴트 쇼핑 리스트의 쇼핑 아이템 조회.
         Cart defaultCart = cartService.findOneCartByCartId(1);
+        setTitle(defaultCart.getCartName());
 
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
@@ -207,9 +210,13 @@ public class MainActivity extends AppCompatActivity
 
 
         for(Cart cart : carts){
-            MenuItem menuItem = subMenu.add(cart.getCartName());
+            MenuItem menuItem = subMenu.add(101, (int) cart.getCartId(), 0, cart.getCartName());
+
             menuItem.setIcon(R.drawable.ic_shopping_basket);
+            //TODO long click을 어떻게 구현할 것인가?
+
         }
+
 
     }
 
@@ -254,6 +261,11 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        // DB에서 id에 해당하는 cart를 조회해서 listview를 갱신한다.
+        Cart cart = cartService.findOneCartByCartId(id);
+        adapter.setCartItemList(cart.getCartItems());
+        adapter.notifyDataSetChanged();
+
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
@@ -284,7 +296,13 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == REQUEST_CODE_ITEMMODIFY){
+        if(requestCode == REQUEST_CODE_ADD_CART){
+            if(resultCode == RESULT_OK){
+                Menu menu = navigationView.getMenu();
+                menu.clear();
+                createShoppingListMenu();
+            }
+        }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
             if(resultCode == RESULT_OK){
                 String modifiedItemText = data.getExtras().getString("modifiedItemText");
                 int position = data.getExtras().getInt("position");
@@ -378,6 +396,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
+     * 메뉴 아이템 long click Listener
+     * - 메뉴 아이템의 이름을 수정 한다.
+     * - 기본 메뉴는 수정할 수 없다는 Toast message를 표시한다.
+     */
+    private class MenuItemLongClickListener implements View.OnLongClickListener {
+        private Context context;
+        public MenuItemLongClickListener(Context context){
+            this.context = context;
+        }
+        @Override
+        public boolean onLongClick(View v) {
+            Toast.makeText(context, "메뉴 아이템 long Click", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
+    /**
      * 아이템 Long Click Listener
      */
     private class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
@@ -395,7 +430,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(context, ItemModifyActivity.class);
             intent.putExtra("cartItem", cartItem);
             intent.putExtra("position", position);
-            startActivityForResult(intent, REQUEST_CODE_ITEMMODIFY);
+            startActivityForResult(intent, REQUEST_CODE_MODIFY_ITEM);
             return false;
         }
     }
@@ -412,7 +447,9 @@ public class MainActivity extends AppCompatActivity
             Log.d("FABClickListener", "Floating Action Button Click!!");
 
             Intent intent = new Intent(context, CartCreateActivity.class);
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_CODE_ADD_CART);
         }
     }
+
+
 }

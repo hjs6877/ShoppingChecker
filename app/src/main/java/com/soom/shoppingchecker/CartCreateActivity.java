@@ -55,6 +55,7 @@ public class CartCreateActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             createCart();
+            setResultData();
             finish();
         }
 
@@ -72,8 +73,15 @@ public class CartCreateActivity extends AppCompatActivity {
              */
             long maxCartId = cartService.findMaxCartId();
             long cartId = maxCartId + 1;
-            Cart cart = new Cart(cartId, cartName, new Date(), new Date());
+            cart = new Cart(cartId, cartName, new Date(), new Date());
             cartService.saveCart(cart);
+        }
+
+        private void setResultData(){
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("cartId", cart.getCartId());
+            resultIntent.putExtra("cartName", cart.getCartName());
+            setResult(RESULT_OK, resultIntent);
         }
     }
 
