@@ -23,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.realm.Realm;
+
+import static android.widget.Toast.*;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -212,6 +215,21 @@ public class MainActivity extends AppCompatActivity
         for(Cart cart : carts){
             MenuItem menuItem = subMenu.add(101, (int) cart.getCartId(), 0, cart.getCartName());
 
+            // TODO cart_modify_layout의 인플레이션 한 후, 버튼 위치 조정 및 이벤트 바인딩하기
+            menuItem.setActionView(R.layout.cart_modify_layout);
+            Button button = (Button) findViewById(R.id.buttonModifyCart);
+            Log.i("button", "button: " + button);
+//            button.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Toast.makeText(getApplicationContext(), "cart", Toast.LENGTH_SHORT).show();
+//                }
+//            });
+            int width = (int) getResources().getDimension(R.dimen.button_width_cart_modify);
+            int height = (int) getResources().getDimension(R.dimen.button_height_cart_modify);
+//            ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(width, height);
+//            layoutParams.setMargins(0, 50, 0, 0);
+
             menuItem.setIcon(R.drawable.ic_shopping_basket);
             //TODO long click을 어떻게 구현할 것인가?
 
@@ -323,7 +341,7 @@ public class MainActivity extends AppCompatActivity
 
     private void deleteCartItem(Map<Integer, CartItem> checkedItemMap) {
         if(checkedItemMap.size() == 0) {
-            Toast.makeText(this, R.string.toast_no_delete_item, Toast.LENGTH_SHORT).show();
+            makeText(this, R.string.toast_no_delete_item, LENGTH_SHORT).show();
             return;
         }
         for(Map.Entry<Integer, CartItem> map : checkedItemMap.entrySet()){
@@ -332,7 +350,7 @@ public class MainActivity extends AppCompatActivity
 //            cartItemService.deleteCartItem(SQLData.SQL_DELETE_ITEM, cartItem.getCartItemId());
         }
         adapter.removeItems(checkedItemMap);
-        Toast.makeText(this, R.string.toast_deleted_item, Toast.LENGTH_SHORT).show();
+        makeText(this, R.string.toast_deleted_item, LENGTH_SHORT).show();
 
         setEmptyItemTxt();
     }
@@ -358,7 +376,7 @@ public class MainActivity extends AppCompatActivity
             long cartId = (long) editItemText.getTag(R.string.key_cartId);
 
             if(itemText.isEmpty()){
-                Toast.makeText(context, R.string.toast_no_input_item, Toast.LENGTH_SHORT).show();
+                makeText(context, R.string.toast_no_input_item, LENGTH_SHORT).show();
             }else{
                 // max cartItem ID를 조회한다.
                 long maxCartItemId = cartItemService.findMaxCartItemId();
@@ -407,7 +425,7 @@ public class MainActivity extends AppCompatActivity
         }
         @Override
         public boolean onLongClick(View v) {
-            Toast.makeText(context, "메뉴 아이템 long Click", Toast.LENGTH_SHORT).show();
+            makeText(context, "메뉴 아이템 long Click", LENGTH_SHORT).show();
             return false;
         }
     }

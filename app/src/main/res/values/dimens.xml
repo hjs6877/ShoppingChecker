@@ -6,4 +6,6 @@
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="fab_margin">20dp</dimen>
     <dimen name="fab_margin_bottom">60dp</dimen>
+    <dimen name="button_width_cart_modify">120dp</dimen>
+    <dimen name="button_height_cart_modify">30dp</dimen>
 </resources>
