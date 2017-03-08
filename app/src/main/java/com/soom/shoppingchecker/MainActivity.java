@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity
     private CartItemListAdapter adapter;
     private List<Cart> carts;
     private Realm realm = Realm.getDefaultInstance();
+    private LayoutInflater inflater;
 
     public MainActivity(){
         dbController = new DBController(this);
@@ -82,43 +84,6 @@ public class MainActivity extends AppCompatActivity
 
         initActivity();
         initViews();
-
-
-
-
-
-
-//        Button btnFetchMenu = (Button) findViewById(R.id.btnFetchMenu);
-//        btnFetchMenu.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getApplicationContext(), "Fetch menu!", Toast.LENGTH_SHORT).show();
-//
-//                Menu menu = navigationView.getMenu();
-//                for(int i=0; i < menu.size(); i++){
-//                    MenuItem menuItem = menu.getItem(i);
-//                    Log.i("Fetch menu", "title: " + menuItem.getTitle());
-//                    Log.i("Fetch menu", "order: " + String.valueOf(menuItem.getOrder()));
-//                }
-//            }
-//        });
-//
-//        Button btnAddSubmenu = (Button) findViewById(R.id.btnAddSubmenu);
-//        btnAddSubmenu.setOnClickListener(new View.OnClickListener(){
-//
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(getApplicationContext(), "Add Submenu!", Toast.LENGTH_SHORT).show();
-//
-//                Menu menu = navigationView.getMenu();
-//                SubMenu subMenu = menu.addSubMenu(100, 1000, 0, "Shopping list");
-//                subMenu.add("서브메뉴1");
-//                subMenu.add("서브메뉴2");
-//            }
-//        });
-
-
     }
 
     @Override
@@ -213,25 +178,34 @@ public class MainActivity extends AppCompatActivity
 
 
         for(Cart cart : carts){
+            inflater = LayoutInflater.from(this);
+            View view = inflater.inflate(R.layout.cart_modify_layout, null);
+
             MenuItem menuItem = subMenu.add(101, (int) cart.getCartId(), 0, cart.getCartName());
 
-            // TODO cart_modify_layout의 인플레이션 한 후, 버튼 위치 조정 및 이벤트 바인딩하기
-            menuItem.setActionView(R.layout.cart_modify_layout);
-            Button button = (Button) findViewById(R.id.buttonModifyCart);
-            Log.i("button", "button: " + button);
-//            button.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    Toast.makeText(getApplicationContext(), "cart", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-            int width = (int) getResources().getDimension(R.dimen.button_width_cart_modify);
-            int height = (int) getResources().getDimension(R.dimen.button_height_cart_modify);
-//            ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(width, height);
-//            layoutParams.setMargins(0, 50, 0, 0);
+            // 기본 카트는 수정 및 삭제가 불가능하도록 아이콘을 표시하지 않는다.
+            if(!cart.getCartName().equals("Common")){
+                menuItem.setActionView(view);
+
+                Button buttonModifyCart = (Button) view.findViewById(R.id.buttonModifyCart);
+                Button buttonDeleteCart = (Button) view.findViewById(R.id.buttonDeleteCart);
+
+                buttonModifyCart.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i("MainActivity", "buttonModifyCart click!!");
+                    }
+                });
+
+                buttonDeleteCart.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.i("MainActivity", "buttonDeleteCart click!!");
+                    }
+                });
+            }
 
             menuItem.setIcon(R.drawable.ic_shopping_basket);
-            //TODO long click을 어떻게 구현할 것인가?
 
         }
 
