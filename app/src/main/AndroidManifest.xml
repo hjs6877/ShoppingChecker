@@ -23,7 +23,8 @@
         <activity
             android:name=".ItemModifyActivity"
             android:theme="@style/Theme.MyDialog" />
-        <activity android:name=".CartCreateActivity"
+        <activity
+            android:name=".CartCreateActivity"
             android:theme="@style/Theme.MyDialog" />
     </application>
 

@@ -78,4 +78,22 @@ public class CartItem extends RealmObject implements Serializable{
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
+
+    // List에서 Object를 비교할 때 사용.
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+
+        CartItem cart = (CartItem) obj;
+
+        if(cartItemId == cart.getCartItemId())
+            return true;
+
+        return false;
+    }
 }

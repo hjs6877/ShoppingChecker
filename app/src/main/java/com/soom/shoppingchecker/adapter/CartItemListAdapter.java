@@ -96,7 +96,7 @@ public class CartItemListAdapter extends BaseAdapter {
      *
      * @param checkedItemMap
      */
-    public void removeItems(Map<Integer, CartItem> checkedItemMap){
+    public void removeItems(Map<Long, CartItem> checkedItemMap){
         subtractCheckedCartItem(checkedItemMap);
 
         notifyDataSetChanged();
@@ -107,7 +107,7 @@ public class CartItemListAdapter extends BaseAdapter {
      * 전체 아이템 목록에서 체크된 아이템을 제거한다.
      * @param checkedItemMap
      */
-    private void subtractCheckedCartItem(Map<Integer, CartItem> checkedItemMap) {
+    private void subtractCheckedCartItem(Map<Long, CartItem> checkedItemMap) {
         List<CartItem> checkedCartItemList = new ArrayList<>(checkedItemMap.values());
         Collection<CartItem> removedCartItemList = CollectionUtils.removeAll(cartItemList, checkedCartItemList);
         setCartItemList((List<CartItem>) removedCartItemList);      // 삭제되고 남은 아이템으로 재할당.

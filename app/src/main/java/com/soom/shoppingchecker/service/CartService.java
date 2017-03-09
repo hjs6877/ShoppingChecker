@@ -30,6 +30,7 @@ public class CartService {
     public Cart findOneCartByCartId(long cartId){
         return realm.where(Cart.class).equalTo("cartId", cartId).findFirst();
     }
+
     public void deleteCartByCartId(final Cart cart){
        realm.executeTransaction(new Realm.Transaction() {
            @Override

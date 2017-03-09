@@ -53,7 +53,10 @@ public class MainActivity extends AppCompatActivity
     public static final String TAG = "MainActivity";
 
     public static final int REQUEST_CODE_ADD_CART = 1001;
-    public static final int REQUEST_CODE_MODIFY_ITEM = 1002;
+    public static final int REQUEST_CODE_MODIFY_CART = 1002;
+    public static final int REQUEST_CODE_MODIFY_ITEM = 2001;
+    public static final int CART_MODE_CREATE = 1;
+    public static final int CART_MODE_MODIFY = 2;
 
     private ListView itemListView;
     private DBController dbController;
@@ -68,9 +71,11 @@ public class MainActivity extends AppCompatActivity
     private List<Cart> carts;
     private Realm realm = Realm.getDefaultInstance();
     private LayoutInflater inflater;
+    private Context context;
 
     public MainActivity(){
-        dbController = new DBController(this);
+        this.context = this;
+        dbController = new DBController(context);
         cartService = new CartService();
         cartItemService = new CartItemService();
     }
@@ -133,7 +138,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new FloatingActionButtonClickListener(this));
+        fab.setOnClickListener(new FloatingActionButtonClickListener(context));
 
     }
 
@@ -149,17 +154,20 @@ public class MainActivity extends AppCompatActivity
 
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
-        adapter = new CartItemListAdapter(this, defaultCart.getCartItems());
+
+        // 아이템들을 삭제할 때 cartId가 필요.
+        itemListView.setTag(R.string.key_cartId, defaultCart.getCartId());
+        adapter = new CartItemListAdapter(context, defaultCart.getCartItems());
         itemListView.setAdapter(adapter);
 
         // 아이템 long click 시, 아이템 수정을 위한 리스너 등록
-        itemListView.setOnItemLongClickListener(new ItemLongClickListener(this));
+        itemListView.setOnItemLongClickListener(new ItemLongClickListener(context));
 
         // 아이템 입력을 위한 이벤트 리스너 등록.
         editItemText = (EditText) findViewById(R.id.editItemText);
         editItemText.setTag(R.string.key_cartId, defaultCart.getCartId());
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
-        buttonAdd.setOnClickListener(new ItemAddClickListener(this));
+        buttonAdd.setOnClickListener(new ItemAddClickListener(context));
 
         emptyItemTxt = (TextView) findViewById(R.id.emptyItemTxt);
 
@@ -178,10 +186,13 @@ public class MainActivity extends AppCompatActivity
 
 
         for(Cart cart : carts){
-            inflater = LayoutInflater.from(this);
+            final long cartId = cart.getCartId();
+            final String cartName = cart.getCartName();
+
+            inflater = LayoutInflater.from(context);
             View view = inflater.inflate(R.layout.cart_modify_layout, null);
 
-            MenuItem menuItem = subMenu.add(101, (int) cart.getCartId(), 0, cart.getCartName());
+            MenuItem menuItem = subMenu.add(101, (int) cartId, 0, cart.getCartName());
 
             // 기본 카트는 수정 및 삭제가 불가능하도록 아이콘을 표시하지 않는다.
             if(!cart.getCartName().equals("Common")){
@@ -190,19 +201,10 @@ public class MainActivity extends AppCompatActivity
                 Button buttonModifyCart = (Button) view.findViewById(R.id.buttonModifyCart);
                 Button buttonDeleteCart = (Button) view.findViewById(R.id.buttonDeleteCart);
 
-                buttonModifyCart.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i("MainActivity", "buttonModifyCart click!!");
-                    }
-                });
+                buttonModifyCart.setOnClickListener(new CartModifyClickListener(cartId, cartName));
 
-                buttonDeleteCart.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.i("MainActivity", "buttonDeleteCart click!!");
-                    }
-                });
+
+                buttonDeleteCart.setOnClickListener(new CartDeleteClickListener(cartId));
             }
 
             menuItem.setIcon(R.drawable.ic_shopping_basket);
@@ -241,7 +243,7 @@ public class MainActivity extends AppCompatActivity
              */
             case R.id.action_item_delete:
                 // TODO Realm 전환.
-//                deleteCartItem(checkedItemMap);
+                deleteCartItem(checkedItemMap);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -254,9 +256,11 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         // DB에서 id에 해당하는 cart를 조회해서 listview를 갱신한다.
-        Cart cart = cartService.findOneCartByCartId(id);
-        adapter.setCartItemList(cart.getCartItems());
-        adapter.notifyDataSetChanged();
+        // TODO 이쪽을 다시 작업해야함.
+        // TODO 카트 메뉴 선택 시, listview 태그에 cartID를 셋팅해줘야 함.
+//        Cart cart = cartService.findOneCartByCartId(id);
+//        adapter.setCartItemList(cart.getCartItems());
+//        adapter.notifyDataSetChanged();
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
@@ -288,11 +292,9 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == REQUEST_CODE_ADD_CART){
+        if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
             if(resultCode == RESULT_OK){
-                Menu menu = navigationView.getMenu();
-                menu.clear();
-                createShoppingListMenu();
+                refreshCartMenuList();
             }
         }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
             if(resultCode == RESULT_OK){
@@ -305,7 +307,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
+    private void refreshCartMenuList(){
+        Menu menu = navigationView.getMenu();
+        menu.clear();
+        createShoppingListMenu();
+    }
     private void setEmptyItemTxt() {
         if(adapter.getCartItemList().size() > 0)
             emptyItemTxt.setVisibility(View.GONE);
@@ -313,22 +319,74 @@ public class MainActivity extends AppCompatActivity
             emptyItemTxt.setVisibility(View.VISIBLE);
     }
 
-    private void deleteCartItem(Map<Integer, CartItem> checkedItemMap) {
+    private void deleteCartItem(Map<Long, CartItem> checkedItemMap) {
         if(checkedItemMap.size() == 0) {
             makeText(this, R.string.toast_no_delete_item, LENGTH_SHORT).show();
             return;
         }
-        for(Map.Entry<Integer, CartItem> map : checkedItemMap.entrySet()){
-            CartItem cartItem = map.getValue();
-            // TODO Realm 전환.
-//            cartItemService.deleteCartItem(SQLData.SQL_DELETE_ITEM, cartItem.getCartItemId());
+
+        // TODO 삭제 테스트 필요. CartItem 객체의 equals()가 정상적으로 동작하는지 확인 필요함.
+        Cart cart = cartService.findOneCartByCartId((Long) itemListView.getTag(R.string.key_cartId));
+        List<CartItem> cartItems = cart.getCartItems();
+
+        realm.beginTransaction();
+        for(CartItem cartItem : cartItems){
+            if(cartItem.equals(checkedItemMap.get(cartItem.getCartItemId()))){
+                cartItems.remove(cartItem);
+            }
         }
+//        for(CartItem cartItem : cartItems){
+//            for(Map.Entry<Long, CartItem> map : checkedItemMap.entrySet()){
+//                long cartItemId = map.getKey();
+//                if(cartItem.getCartItemId() == cartItemId){
+//                    cartItems.remove(cartItem);
+//                    break;
+//                }
+//            }
+//        }
+        realm.commitTransaction();
+
         adapter.removeItems(checkedItemMap);
         makeText(this, R.string.toast_deleted_item, LENGTH_SHORT).show();
 
         setEmptyItemTxt();
     }
 
+    /**
+     * 카트 수정 버튼 클릭 리스너
+     */
+    private class CartModifyClickListener implements View.OnClickListener{
+        private long cartId;
+        private String cartName;
+
+        public CartModifyClickListener(long cartId, String cartName){
+            this.cartId = cartId;
+            this.cartName = cartName;
+        }
+        @Override
+        public void onClick(View v) {
+            Log.d("CartModifyClickListener", "Cart modify button Click!!");
+
+            Intent intent = new Intent(context, CartCreateActivity.class);
+            intent.putExtra("mode", MainActivity.CART_MODE_MODIFY);
+            intent.putExtra("cartId", cartId);
+            intent.putExtra("cartName", cartName);
+            startActivityForResult(intent, REQUEST_CODE_MODIFY_CART);
+        }
+    }
+
+    private class CartDeleteClickListener implements View.OnClickListener {
+        private long cartId;
+
+        public CartDeleteClickListener(long cartId) {
+            this.cartId = cartId;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.i("MainActivity", "buttonDeleteCart click!!");
+        }
+    }
     /**
      * 아이템 추가 버튼 클릭 리스너
      */
@@ -384,23 +442,6 @@ public class MainActivity extends AppCompatActivity
 
             // editText의 텍스트 지워서 초기화.
             editItemText.setText(null);
-        }
-    }
-
-    /**
-     * 메뉴 아이템 long click Listener
-     * - 메뉴 아이템의 이름을 수정 한다.
-     * - 기본 메뉴는 수정할 수 없다는 Toast message를 표시한다.
-     */
-    private class MenuItemLongClickListener implements View.OnLongClickListener {
-        private Context context;
-        public MenuItemLongClickListener(Context context){
-            this.context = context;
-        }
-        @Override
-        public boolean onLongClick(View v) {
-            makeText(context, "메뉴 아이템 long Click", LENGTH_SHORT).show();
-            return false;
         }
     }
 

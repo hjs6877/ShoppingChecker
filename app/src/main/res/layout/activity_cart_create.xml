@@ -14,7 +14,7 @@
             android:layout_weight="1"
             android:gravity="right"/>
         <EditText
-            android:id="@+id/editCreateCartText"
+            android:id="@+id/editCreateModifyCartText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="@string/txt_hint_input_cart_name"
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1">
             <Button
-                android:id="@+id/buttonCreateCart"
+                android:id="@+id/buttonCreateModifyCart"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:text="@string/action_create"

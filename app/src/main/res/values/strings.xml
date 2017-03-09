@@ -6,9 +6,10 @@
 
     <string name="txt_shopping_list">Shopping list</string>
     <string name="title_cart_name">Cart name: </string>
-    <string name="txt_hint_input_cart_name">Input your cart name to add.</string>
+    <string name="txt_hint_input_cart_name">Input your cart name.</string>
     <string name="key_cartId">cartId</string>
     <string name="action_create">Create</string>
+    <string name="action_modify">Modify</string>
     <string name="action_close">Close</string>
     <string name="action_item_delete">Delete</string>
     <string name="isPurchased">isPurchased</string>

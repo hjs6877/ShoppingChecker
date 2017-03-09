@@ -73,4 +73,5 @@ public class Cart extends RealmObject implements Serializable {
     public void setCartItems(RealmList<CartItem> cartItems) {
         this.cartItems = cartItems;
     }
+
 }
