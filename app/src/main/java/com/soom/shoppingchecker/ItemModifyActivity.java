@@ -23,17 +23,12 @@ public class ItemModifyActivity extends AppCompatActivity {
     private EditText editModifyItemText;
     private Button buttonModifyItem;
     private Button buttonCloseModifyItem;
-    private CartItem cartItem;
-    private DBController dbController;
-    private CartItemService cartItemService;
+
     private Realm realm = Realm.getDefaultInstance();
 
     private int position;
-
-    public ItemModifyActivity() {
-        dbController = new DBController(this);
-        cartItemService = new CartItemService();
-    }
+    private long cartItemId;
+    private String itemText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +43,8 @@ public class ItemModifyActivity extends AppCompatActivity {
      */
     private void initViews(){
         Intent intent = getIntent();
-        cartItem = (CartItem) intent.getSerializableExtra("cartItem");
-        String itemText = cartItem.getItemText();
+        cartItemId = intent.getLongExtra("cartItemId", 0);
+        itemText = intent.getStringExtra("itemText");
         position = intent.getIntExtra("position", 0);
         editModifyItemText = (EditText) findViewById(R.id.editModifyItemText);
         editModifyItemText.setText(itemText);
@@ -76,9 +71,7 @@ public class ItemModifyActivity extends AppCompatActivity {
 
         private void updateCartItem(){
             String modifiedItemText = editModifyItemText.getEditableText().toString();
-            long cartItemId = cartItem.getCartItemId();
 
-            // TODO Realm 전환
             Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
             realm.beginTransaction();
             cart.getCartItems().get(0).setItemText(modifiedItemText);
@@ -89,8 +82,9 @@ public class ItemModifyActivity extends AppCompatActivity {
          * 수정된 아이템 텍스트를 리스트뷰에 반영하기 위한 데이터를 setting한다.
          */
         private void setResultData(){
+            String modifiedItemText = editModifyItemText.getEditableText().toString();
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("modifiedItemText", cartItem.getItemText());
+            resultIntent.putExtra("modifiedItemText", modifiedItemText);
             resultIntent.putExtra("position", position);
             setResult(RESULT_OK, resultIntent);
         }

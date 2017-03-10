@@ -40,6 +40,7 @@ import com.soom.shoppingchecker.utils.DateUtil;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -301,7 +302,9 @@ public class MainActivity extends AppCompatActivity
                 String modifiedItemText = data.getExtras().getString("modifiedItemText");
                 int position = data.getExtras().getInt("position");
 
+                realm.beginTransaction();
                 adapter.getCartItemList().get(position).setItemText(modifiedItemText);
+                realm.commitTransaction();
                 adapter.notifyDataSetChanged();
             }
         }
@@ -325,25 +328,19 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        // TODO 삭제 테스트 필요. CartItem 객체의 equals()가 정상적으로 동작하는지 확인 필요함.
+        realm.beginTransaction();
         Cart cart = cartService.findOneCartByCartId((Long) itemListView.getTag(R.string.key_cartId));
         List<CartItem> cartItems = cart.getCartItems();
+        Iterator<CartItem> iter = cartItems.iterator();
 
-        realm.beginTransaction();
-        for(CartItem cartItem : cartItems){
+        // 1:N 관계에서 N쪽 자식을 삭제하기 위해서는 Iterator를 사용해야 함.
+        while(iter.hasNext()){
+            CartItem cartItem = iter.next();
             if(cartItem.equals(checkedItemMap.get(cartItem.getCartItemId()))){
-                cartItems.remove(cartItem);
+                iter.remove();
             }
         }
-//        for(CartItem cartItem : cartItems){
-//            for(Map.Entry<Long, CartItem> map : checkedItemMap.entrySet()){
-//                long cartItemId = map.getKey();
-//                if(cartItem.getCartItemId() == cartItemId){
-//                    cartItems.remove(cartItem);
-//                    break;
-//                }
-//            }
-//        }
+
         realm.commitTransaction();
 
         adapter.removeItems(checkedItemMap);
@@ -425,8 +422,11 @@ public class MainActivity extends AppCompatActivity
         private Cart insertItem(long cartId, long cartItemId, String itemText) {
             realm.beginTransaction();
             Cart cart = cartService.findOneCartByCartId(cartId);
+
+
             CartItem cartItem = new CartItem(cartItemId, itemText, false, false, new Date(), new Date());
-            cart.getCartItems().add(realm.copyToRealm(cartItem));
+            // 1:N 관계에서 자식 객체는 Realm Object로 객체화 하지 않아도 됨.
+            cart.getCartItems().add(cartItem);
             realm.commitTransaction();
             return cart;
         }
@@ -461,7 +461,8 @@ public class MainActivity extends AppCompatActivity
             CartItem cartItem = adapter.getCartItemList().get(position);
 
             Intent intent = new Intent(context, ItemModifyActivity.class);
-            intent.putExtra("cartItem", cartItem);
+            intent.putExtra("cartItemId", cartItem.getCartItemId());
+            intent.putExtra("itemText", cartItem.getItemText());
             intent.putExtra("position", position);
             startActivityForResult(intent, REQUEST_CODE_MODIFY_ITEM);
             return false;
