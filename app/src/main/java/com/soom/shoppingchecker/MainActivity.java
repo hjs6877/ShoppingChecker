@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity
 
     public static final int REQUEST_CODE_ADD_CART = 1001;
     public static final int REQUEST_CODE_MODIFY_CART = 1002;
+    public static final int REQUEST_CODE_DELETE_CART = 1003;
     public static final int REQUEST_CODE_MODIFY_ITEM = 2001;
     public static final int CART_MODE_CREATE = 1;
     public static final int CART_MODE_MODIFY = 2;
@@ -193,7 +194,8 @@ public class MainActivity extends AppCompatActivity
             inflater = LayoutInflater.from(context);
             View view = inflater.inflate(R.layout.cart_modify_layout, null);
 
-            MenuItem menuItem = subMenu.add(101, (int) cartId, 0, cart.getCartName());
+            MenuItem menuItem = subMenu.add(R.id.cart_menu_group_id, (int) cartId, 0, cart.getCartName());
+            menuItem.setCheckable(true);
 
             // 기본 카트는 수정 및 삭제가 불가능하도록 아이콘을 표시하지 않는다.
             if(!cart.getCartName().equals("Common")){
@@ -206,6 +208,8 @@ public class MainActivity extends AppCompatActivity
 
 
                 buttonDeleteCart.setOnClickListener(new CartDeleteClickListener(cartId));
+            }else{
+                menuItem.setChecked(true);
             }
 
             menuItem.setIcon(R.drawable.ic_shopping_basket);
@@ -253,15 +257,12 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        initSelectedCartColor();
+
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Log.d("MainActivity", "checked Menu ID: " + id);
 
-        // DB에서 id에 해당하는 cart를 조회해서 listview를 갱신한다.
-        // TODO 이쪽을 다시 작업해야함.
-        // TODO 카트 메뉴 선택 시, listview 태그에 cartID를 셋팅해줘야 함.
-//        Cart cart = cartService.findOneCartByCartId(id);
-//        adapter.setCartItemList(cart.getCartItems());
-//        adapter.notifyDataSetChanged();
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
@@ -275,6 +276,13 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_send) {
 
+        } else {
+            // DB에서 id에 해당하는 cart를 조회해서 listview를 갱신한다.
+            // TODO 이쪽을 다시 작업해야함.
+            // TODO 카트 메뉴 선택 시, listview 태그에 cartID를 셋팅해줘야 함.
+//        Cart cart = cartService.findOneCartByCartId(id);
+//        adapter.setCartItemList(cart.getCartItems());
+//        adapter.notifyDataSetChanged();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -282,6 +290,16 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private void initSelectedCartColor(){
+        Menu menu = navigationView.getMenu();
+        MenuItem cartMenuItem = menu.getItem(0);
+
+        SubMenu cartSubmenu = cartMenuItem.getSubMenu();
+        for(int i = 0; i < cartSubmenu.size(); i++){
+            MenuItem cartItem = cartSubmenu.getItem(i);
+            cartItem.setChecked(false);
+        }
+    }
     /**
      * 활성화 상태의 Activity로부터 응답을 받아 처리.
      *
@@ -294,6 +312,10 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
+            if(resultCode == RESULT_OK){
+                refreshCartMenuList();
+            }
+        }else if(requestCode == REQUEST_CODE_DELETE_CART){
             if(resultCode == RESULT_OK){
                 refreshCartMenuList();
             }
@@ -382,6 +404,10 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View v) {
             Log.i("MainActivity", "buttonDeleteCart click!!");
+
+            Intent intent = new Intent(context, CartDeleteActivity.class);
+            intent.putExtra("cartId", cartId);
+            startActivityForResult(intent, REQUEST_CODE_DELETE_CART);
         }
     }
     /**

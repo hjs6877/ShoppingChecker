@@ -31,11 +31,11 @@ public class CartService {
         return realm.where(Cart.class).equalTo("cartId", cartId).findFirst();
     }
 
-    public void deleteCartByCartId(final Cart cart){
+    public void deleteCartByCartId(final long cartId){
        realm.executeTransaction(new Realm.Transaction() {
            @Override
            public void execute(Realm realm) {
-               RealmResults<Cart> results = realm.where(Cart.class).equalTo("cartId", cart.getCartId()).findAll();
+               RealmResults<Cart> results = realm.where(Cart.class).equalTo("cartId", cartId).findAll();
                results.deleteAllFromRealm();
            }
        });

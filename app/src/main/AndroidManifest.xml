@@ -26,6 +26,8 @@
         <activity
             android:name=".CartCreateActivity"
             android:theme="@style/Theme.MyDialog" />
+        <activity android:name=".CartDeleteActivity"
+            android:theme="@style/Theme.MyDialog" />
     </application>
 
 </manifest>

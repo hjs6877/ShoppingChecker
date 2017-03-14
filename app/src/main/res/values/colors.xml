@@ -5,4 +5,5 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorActionMenuText">#FFFFFF</color>
+    <color name="color_selected_cart_menu_item">#b7b8b9</color>
 </resources>
