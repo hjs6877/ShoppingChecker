@@ -119,6 +119,7 @@ public class CartCreateActivity extends AppCompatActivity {
 
         private void setResultData(){
             Intent resultIntent = new Intent();
+            resultIntent.putExtra("cartId", cart.getCartId());
             setResult(RESULT_OK, resultIntent);
         }
     }

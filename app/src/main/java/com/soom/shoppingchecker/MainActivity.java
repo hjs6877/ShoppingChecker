@@ -2,7 +2,6 @@ package com.soom.shoppingchecker;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
@@ -17,26 +16,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.soom.shoppingchecker.adapter.CartItemListAdapter;
 import com.soom.shoppingchecker.comparator.CartItemComparator;
-import com.soom.shoppingchecker.database.DBController;
-import com.soom.shoppingchecker.database.SQLData;
 import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.service.CartService;
-import com.soom.shoppingchecker.utils.DateUtil;
 
 import java.util.Collections;
 import java.util.Date;
@@ -61,7 +53,6 @@ public class MainActivity extends AppCompatActivity
     public static final int CART_MODE_MODIFY = 2;
 
     private ListView itemListView;
-    private DBController dbController;
     private CartService cartService;
     private CartItemService cartItemService;
 
@@ -77,7 +68,6 @@ public class MainActivity extends AppCompatActivity
 
     public MainActivity(){
         this.context = this;
-        dbController = new DBController(context);
         cartService = new CartService();
         cartItemService = new CartItemService();
     }
@@ -148,7 +138,6 @@ public class MainActivity extends AppCompatActivity
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        createShoppingListMenu();
 
         // 디폴트 쇼핑 리스트의 쇼핑 아이템 조회.
         Cart defaultCart = cartService.findOneCartByCartId(1);
@@ -157,7 +146,7 @@ public class MainActivity extends AppCompatActivity
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
 
-        // 아이템들을 삭제할 때 cartId가 필요.
+        // 아이템을 추가 및 삭제할 때 cartId가 필요.
         itemListView.setTag(R.string.key_cartId, defaultCart.getCartId());
         adapter = new CartItemListAdapter(context, defaultCart.getCartItems());
         itemListView.setAdapter(adapter);
@@ -167,13 +156,14 @@ public class MainActivity extends AppCompatActivity
 
         // 아이템 입력을 위한 이벤트 리스너 등록.
         editItemText = (EditText) findViewById(R.id.editItemText);
-        editItemText.setTag(R.string.key_cartId, defaultCart.getCartId());
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
         buttonAdd.setOnClickListener(new ItemAddClickListener(context));
 
         emptyItemTxt = (TextView) findViewById(R.id.emptyItemTxt);
 
         setEmptyItemTxt();
+
+        createShoppingListMenu();
     }
 
     /**
@@ -208,14 +198,13 @@ public class MainActivity extends AppCompatActivity
 
 
                 buttonDeleteCart.setOnClickListener(new CartDeleteClickListener(cartId));
-            }else{
-                menuItem.setChecked(true);
             }
 
             menuItem.setIcon(R.drawable.ic_shopping_basket);
 
         }
 
+        initSelectedCartMenuColor();
 
     }
 
@@ -247,7 +236,6 @@ public class MainActivity extends AppCompatActivity
              * - item 갱신
              */
             case R.id.action_item_delete:
-                // TODO Realm 전환.
                 deleteCartItem(checkedItemMap);
                 break;
         }
@@ -257,49 +245,39 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        initSelectedCartColor();
+        Log.d("MainActivity", "selected Navigation Menu!");
+        long id = item.getItemId();
+        int groupId = item.getGroupId();
 
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        Log.d("MainActivity", "checked Menu ID: " + id);
-
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        } else {
+        // 카트 group일 경우 cart item을 listview에 표시한다.
+        if(groupId == R.id.cart_menu_group_id){
             // DB에서 id에 해당하는 cart를 조회해서 listview를 갱신한다.
-            // TODO 이쪽을 다시 작업해야함.
-            // TODO 카트 메뉴 선택 시, listview 태그에 cartID를 셋팅해줘야 함.
-//        Cart cart = cartService.findOneCartByCartId(id);
-//        adapter.setCartItemList(cart.getCartItems());
-//        adapter.notifyDataSetChanged();
+            Cart cart = cartService.findOneCartByCartId(id);
+            itemListView.setTag(R.string.key_cartId, cart.getCartId());
+            refreshCartItems(cart);
+        }else{
+            if (id == R.id.nav_camera) {
+                // Handle the camera action
+            } else if (id == R.id.nav_gallery) {
+
+            } else if (id == R.id.nav_slideshow) {
+
+            } else if (id == R.id.nav_manage) {
+
+            } else if (id == R.id.nav_share) {
+
+            } else if (id == R.id.nav_send) {
+
+            }
         }
+
+        initSelectedCartMenuColor();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void initSelectedCartColor(){
-        Menu menu = navigationView.getMenu();
-        MenuItem cartMenuItem = menu.getItem(0);
-
-        SubMenu cartSubmenu = cartMenuItem.getSubMenu();
-        for(int i = 0; i < cartSubmenu.size(); i++){
-            MenuItem cartItem = cartSubmenu.getItem(i);
-            cartItem.setChecked(false);
-        }
-    }
     /**
      * 활성화 상태의 Activity로부터 응답을 받아 처리.
      *
@@ -313,7 +291,11 @@ public class MainActivity extends AppCompatActivity
 
         if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
             if(resultCode == RESULT_OK){
+                long cartId = data.getLongExtra("cartId", 0L);
+                Cart cart = cartService.findOneCartByCartId(cartId);
+                itemListView.setTag(R.string.key_cartId, cartId);
                 refreshCartMenuList();
+                refreshCartItems(cart);
             }
         }else if(requestCode == REQUEST_CODE_DELETE_CART){
             if(resultCode == RESULT_OK){
@@ -332,11 +314,49 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * cart에 해당하는 cart item들을 갱신한다.
+     * @param cart
+     */
+    private void refreshCartItems(Cart cart) {
+        setTitle(cart.getCartName());
+        adapter.setCartItemList(cart.getCartItems());
+        adapter.notifyDataSetChanged();
+        setEmptyItemTxt();
+    }
+
+    /**
+     * cart menu를 갱신한다.
+     */
     private void refreshCartMenuList(){
         Menu menu = navigationView.getMenu();
         menu.clear();
         createShoppingListMenu();
     }
+
+    /**
+     * 선택된 cart menu를 하일라이팅한다.
+     */
+    private void initSelectedCartMenuColor(){
+        Menu menu = navigationView.getMenu();
+        MenuItem cartMenuItem = menu.getItem(0);
+
+        SubMenu cartSubmenu = cartMenuItem.getSubMenu();
+        for(int i = 0; i < cartSubmenu.size(); i++){
+            MenuItem cartSubMenuItem = cartSubmenu.getItem(i);
+            long cartId = (long) itemListView.getTag(R.string.key_cartId);
+            if(cartId == cartSubMenuItem.getItemId()){
+                cartSubMenuItem.setChecked(true);
+            }else{
+                cartSubMenuItem.setChecked(false);
+            }
+
+        }
+    }
+
+    /**
+     * empty message를 보여주기위한 설정을 한다.
+     */
     private void setEmptyItemTxt() {
         if(adapter.getCartItemList().size() > 0)
             emptyItemTxt.setVisibility(View.GONE);
@@ -344,6 +364,10 @@ public class MainActivity extends AppCompatActivity
             emptyItemTxt.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * cart item id에 해당하는 cart item을 삭제한다.
+     * @param checkedItemMap
+     */
     private void deleteCartItem(Map<Long, CartItem> checkedItemMap) {
         if(checkedItemMap.size() == 0) {
             makeText(this, R.string.toast_no_delete_item, LENGTH_SHORT).show();
@@ -394,6 +418,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * cart 삭제 버튼 클릭 리스너
+     */
     private class CartDeleteClickListener implements View.OnClickListener {
         private long cartId;
 
@@ -410,6 +437,7 @@ public class MainActivity extends AppCompatActivity
             startActivityForResult(intent, REQUEST_CODE_DELETE_CART);
         }
     }
+
     /**
      * 아이템 추가 버튼 클릭 리스너
      */
@@ -428,7 +456,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View v) {
             String itemText = editItemText.getEditableText().toString();
-            long cartId = (long) editItemText.getTag(R.string.key_cartId);
+            long cartId = (long) itemListView.getTag(R.string.key_cartId);
 
             if(itemText.isEmpty()){
                 makeText(context, R.string.toast_no_input_item, LENGTH_SHORT).show();
@@ -510,6 +538,4 @@ public class MainActivity extends AppCompatActivity
             startActivityForResult(intent, REQUEST_CODE_ADD_CART);
         }
     }
-
-
 }
