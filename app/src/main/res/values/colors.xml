@@ -6,4 +6,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorActionMenuText">#FFFFFF</color>
     <color name="color_selected_cart_menu_item">#b7b8b9</color>
+    <color name="color_horizontal_line">#cacbcf</color>
 </resources>

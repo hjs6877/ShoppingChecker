@@ -2,27 +2,45 @@
 <RelativeLayout android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <TextView
-        android:id="@+id/emptyItemTxt"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/txt_empty_item"
-        android:textColor="#747070"
-        android:textSize="15dp"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="80dp"/>
 
+    <LinearLayout
+        android:id="@+id/cartTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="- This is your cart."
+            android:paddingLeft="10dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="10dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/color_horizontal_line"
+            ></LinearLayout>
+    </LinearLayout>
     <!-- RelativeLayout에서는 스크롤바가 생기지 않으므로, LinearLayout으로 감싸줘야 함 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_below="@id/emptyItemTxt">
+        android:layout_below="@+id/cartTitle"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/emptyItemTxt"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/txt_empty_item"
+            android:textColor="#747070"
+            android:textSize="15dp"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="20dp"/>
         <ListView
             android:id="@+id/itemListView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="60dp"/>
+            android:layout_height="match_parent"/>
     </LinearLayout>
 
     <LinearLayout
@@ -34,7 +52,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#cacbcf"
+            android:background="@color/color_horizontal_line"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"></LinearLayout>
         <LinearLayout
