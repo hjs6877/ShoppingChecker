@@ -23,10 +23,9 @@
         android:layout_height="wrap_content">
         <Button
             android:id="@+id/itemPurchasedButton"
-            android:layout_width="60dp"
-            android:layout_height="32dp"
-            android:text="구매전"
-            android:background="@xml/button_selector"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_unpurchased_item"
             android:layout_alignParentRight="true"
             android:layout_marginTop="2dp"
             android:layout_marginRight="5dp"/>

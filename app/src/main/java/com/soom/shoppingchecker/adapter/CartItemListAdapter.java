@@ -178,8 +178,9 @@ public class CartItemListAdapter extends BaseAdapter {
 
     private void setItemPurchasedButton(ViewHolder viewHolder, int position) {
         CartItem cartItem = getItem(position);
-        String buttonText = getButtonText(cartItem); // TODO DB에서 가져올 때 포함 시키도록 수정 필요.
-        viewHolder.itemPurchasedButton.setText(buttonText);
+        // TODO 텍스트 말고, background를 ic_purchased_item.png로 보이도록 수정.
+//        String buttonText = getButtonText(cartItem);
+//        viewHolder.itemPurchasedButton.setText(buttonText);
 
         viewHolder.itemPurchasedButton.setOnClickListener(new ItemPurchasedButtonClickListener(viewHolder, position));
     }
