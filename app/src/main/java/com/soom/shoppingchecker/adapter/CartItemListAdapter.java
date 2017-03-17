@@ -1,9 +1,13 @@
 package com.soom.shoppingchecker.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.soom.shoppingchecker.ItemModifyActivity;
 import com.soom.shoppingchecker.R;
 import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
@@ -37,8 +42,7 @@ import io.realm.Realm;
  */
 
 public class CartItemListAdapter extends BaseAdapter {
-    private final int DEFAULT_ITEM_TEXT_COLOR = Color.parseColor("#000000");
-    private final int CLICKED_ITEM_TEXT_COLOR = Color.parseColor("#DCDCDC");
+    public static final int REQUEST_CODE_MODIFY_ITEM = 2001;
     private Realm realm = Realm.getDefaultInstance();
 
     /**
@@ -48,12 +52,16 @@ public class CartItemListAdapter extends BaseAdapter {
         CheckBox itemCheckBox;
         TextView itemTextView;
         Button itemPurchasedButton;
+        Button itemModifyButton;
+        Button itemBookmarkButton;
     }
     private List<CartItem> cartItemList;
     private Map<Long, CartItem> checkedItemMap;
     private LayoutInflater inflater;
+    private Context context;
 
     public CartItemListAdapter(Context context, List<CartItem> cartItemList) {
+        this.context = context;
         inflater = LayoutInflater.from(context);
         this.cartItemList = cartItemList;
         checkedItemMap = new HashMap<>();
@@ -154,6 +162,8 @@ public class CartItemListAdapter extends BaseAdapter {
             viewHolder.itemCheckBox = (CheckBox) view.findViewById(R.id.itemChkbox);
             viewHolder.itemTextView = (TextView) view.findViewById(R.id.itemText);
             viewHolder.itemPurchasedButton = (Button) view.findViewById(R.id.itemPurchasedButton);
+            viewHolder.itemModifyButton = (Button) view.findViewById(R.id.itemModifyButton);
+            viewHolder.itemBookmarkButton = (Button) view.findViewById(R.id.itemBookmarkButton);
 
             view.setTag(viewHolder);
         }else{
@@ -173,16 +183,29 @@ public class CartItemListAdapter extends BaseAdapter {
         setItemCheckBox(viewHolder, position);
         setItemTextView(viewHolder, position);
         setItemPurchasedButton(viewHolder, position);
-
+        setItemModifyButton(viewHolder, position);
+        setItemBookmarkButton(viewHolder, position);
     }
 
     private void setItemPurchasedButton(ViewHolder viewHolder, int position) {
         CartItem cartItem = getItem(position);
-        // TODO 텍스트 말고, background를 ic_purchased_item.png로 보이도록 수정.
-//        String buttonText = getButtonText(cartItem);
-//        viewHolder.itemPurchasedButton.setText(buttonText);
+        int buttonImage = getPurchasedButtonImage(cartItem);
+        viewHolder.itemPurchasedButton.setBackgroundResource(buttonImage);
 
         viewHolder.itemPurchasedButton.setOnClickListener(new ItemPurchasedButtonClickListener(viewHolder, position));
+    }
+
+    private void setItemModifyButton(ViewHolder viewHolder, int position) {
+        viewHolder.itemModifyButton.setOnClickListener(new ItemModifyButtonClickListener(position));
+    }
+
+    private void setItemBookmarkButton(ViewHolder viewHolder, int position) {
+        CartItem cartItem = getItem(position);
+        int buttonImage = getBookmarkButtonImage(cartItem);
+        viewHolder.itemBookmarkButton.setBackgroundResource(buttonImage);
+
+
+        viewHolder.itemBookmarkButton.setOnClickListener(new ItemBookmarkButtonClickListener(viewHolder, position));
     }
 
     private void setItemTextView(ViewHolder viewHolder, int position) {
@@ -190,9 +213,9 @@ public class CartItemListAdapter extends BaseAdapter {
         viewHolder.itemTextView.setText(cartItem.getItemText());
 
         if(isPurchased(cartItem))
-            viewHolder.itemTextView.setTextColor(CLICKED_ITEM_TEXT_COLOR);
+            viewHolder.itemTextView.setTextColor(ContextCompat.getColor(context, R.color.color_purchased_item_text));
         else
-            viewHolder.itemTextView.setTextColor(DEFAULT_ITEM_TEXT_COLOR);
+            viewHolder.itemTextView.setTextColor(ContextCompat.getColor(context, R.color.color_unpurchased_item_text));
     }
 
     private void setItemCheckBox(ViewHolder viewHolder, int position) {
@@ -202,8 +225,13 @@ public class CartItemListAdapter extends BaseAdapter {
         viewHolder.itemCheckBox.setOnCheckedChangeListener(new ItemCheckedChangeListener(position));
     }
 
-    private String getButtonText(CartItem cartItem) {
-        return cartItem.isPurchased() ? "구매완료" : "구매전";
+    private int getPurchasedButtonImage(CartItem cartItem) {
+        return cartItem.isPurchased() ? R.drawable.ic_purchased_item : R.drawable.ic_unpurchased_item;
+    }
+
+    // TODO 구현 필요.
+    private int getBookmarkButtonImage(CartItem cartItem) {
+        return R.drawable.ic_unbookmark;
     }
 
     private boolean isChecked(CartItem cartItem) {
@@ -275,23 +303,22 @@ public class CartItemListAdapter extends BaseAdapter {
             CartItem cartItem = getItem(position);
             long cartItemId = cartItem.getCartItemId();
 
-            long regId = cartItem.getCartItemId();
             boolean purchasedStauts;
-            String buttonText;
+            int buttonImage;
             int buttonColor;
 
             if(cartItem.isPurchased()){
                 purchasedStauts = false;
-                buttonText = "구매전";
-                buttonColor = DEFAULT_ITEM_TEXT_COLOR;
+                buttonImage = R.drawable.ic_unpurchased_item;
+                buttonColor = R.color.color_unpurchased_item_text;
             }else{
                 purchasedStauts = true;
-                buttonText = "구매완료";
-                buttonColor = Color.parseColor("#DCDCDC");
+                buttonImage = R.drawable.ic_purchased_item;
+                buttonColor = R.color.color_purchased_item_text;
             }
 
-            viewHolder.itemPurchasedButton.setText(buttonText);
-            viewHolder.itemTextView.setTextColor(buttonColor);
+            viewHolder.itemPurchasedButton.setBackgroundResource(buttonImage);
+            viewHolder.itemTextView.setTextColor(ContextCompat.getColor(context, buttonColor));
 
             Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
             realm.beginTransaction();
@@ -299,6 +326,44 @@ public class CartItemListAdapter extends BaseAdapter {
             cartItemList.get(position).setPurchased(purchasedStauts);
             realm.commitTransaction();
 
+        }
+    }
+
+    class ItemModifyButtonClickListener implements View.OnClickListener{
+        private int position;
+
+        public ItemModifyButtonClickListener(int position) {
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.d("CartItemListAdapter", "modify item.");
+
+            CartItem cartItem = getItem(position);
+
+            Intent intent = new Intent(context, ItemModifyActivity.class);
+            intent.putExtra("cartItemId", cartItem.getCartItemId());
+            intent.putExtra("itemText", cartItem.getItemText());
+            intent.putExtra("position", position);
+            ((Activity)context).startActivityForResult(intent, REQUEST_CODE_MODIFY_ITEM);
+        }
+    }
+
+    // TODO 구현 필요
+    class ItemBookmarkButtonClickListener implements View.OnClickListener{
+
+        private ViewHolder viewHolder;
+        private int position;
+
+        public ItemBookmarkButtonClickListener(ViewHolder viewHolder, int position){
+            this.viewHolder = viewHolder;
+            this.position = position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.d("CartItemListAdapter", "## push the bookmark button.");
         }
     }
 }

@@ -7,4 +7,6 @@
     <color name="colorActionMenuText">#FFFFFF</color>
     <color name="color_selected_cart_menu_item">#b7b8b9</color>
     <color name="color_horizontal_line">#cacbcf</color>
+    <color name="color_unpurchased_item_text">#000000</color>
+    <color name="color_purchased_item_text">#DCDCDC</color>
 </resources>

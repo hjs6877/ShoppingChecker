@@ -9,4 +9,5 @@
     <dimen name="fab_margin_top">65dp</dimen>
     <dimen name="button_width_cart_modify">120dp</dimen>
     <dimen name="button_height_cart_modify">30dp</dimen>
+    <dimen name="listview_buttons_margin">10dp</dimen>
 </resources>

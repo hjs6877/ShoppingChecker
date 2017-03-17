@@ -13,7 +13,7 @@
         android:focusableInTouchMode="false"/>
     <TextView
         android:id="@+id/itemText"
-        android:layout_width="242dp"
+        android:layout_width="202dp"
         android:layout_height="wrap_content"
         android:text="Item Text#"
         android:maxLines="1"
@@ -21,14 +21,37 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/itemBookmarkButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/ic_unbookmark"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="5dp"/>
+
+        <Button
+            android:id="@+id/itemModifyButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@xml/button_modify_selector"
+            android:layout_toLeftOf="@+id/itemBookmarkButton"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="5dp"/>
+
         <Button
             android:id="@+id/itemPurchasedButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:background="@drawable/ic_unpurchased_item"
-            android:layout_alignParentRight="true"
+            android:layout_toLeftOf="@+id/itemModifyButton"
             android:layout_marginTop="2dp"
             android:layout_marginRight="5dp"/>
+
+
+
+
     </RelativeLayout>
 
 

@@ -151,9 +151,6 @@ public class MainActivity extends AppCompatActivity
         adapter = new CartItemListAdapter(context, defaultCart.getCartItems());
         itemListView.setAdapter(adapter);
 
-        // 아이템 long click 시, 아이템 수정을 위한 리스너 등록
-        itemListView.setOnItemLongClickListener(new ItemLongClickListener(context));
-
         // 아이템 입력을 위한 이벤트 리스너 등록.
         editItemText = (EditText) findViewById(R.id.editItemText);
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
@@ -303,6 +300,7 @@ public class MainActivity extends AppCompatActivity
             }
         }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
             if(resultCode == RESULT_OK){
+                Log.d("MainActivity", "## Item modified.");
                 String modifiedItemText = data.getExtras().getString("modifiedItemText");
                 int position = data.getExtras().getInt("position");
 
@@ -496,30 +494,6 @@ public class MainActivity extends AppCompatActivity
 
             // editText의 텍스트 지워서 초기화.
             editItemText.setText(null);
-        }
-    }
-
-    /**
-     * 아이템 Long Click Listener
-     */
-    private class ItemLongClickListener implements AdapterView.OnItemLongClickListener {
-        private Context context;
-
-        public ItemLongClickListener(Context context){
-            this.context = context;
-        }
-
-        @Override
-        public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            Log.d("ItemLongClickListener", "long click!!");
-            CartItem cartItem = adapter.getCartItemList().get(position);
-
-            Intent intent = new Intent(context, ItemModifyActivity.class);
-            intent.putExtra("cartItemId", cartItem.getCartItemId());
-            intent.putExtra("itemText", cartItem.getItemText());
-            intent.putExtra("position", position);
-            startActivityForResult(intent, REQUEST_CODE_MODIFY_ITEM);
-            return false;
         }
     }
 
