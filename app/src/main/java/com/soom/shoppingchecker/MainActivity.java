@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.soom.shoppingchecker.adapter.CartItemListAdapter;
@@ -289,14 +290,11 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
             if(resultCode == RESULT_OK){
                 long cartId = data.getLongExtra("cartId", 0L);
-                Cart cart = cartService.findOneCartByCartId(cartId);
-                itemListView.setTag(R.string.key_cartId, cartId);
-                refreshCartMenuList();
-                refreshCartItems(cart);
+                refreshCart(cartId);
             }
         }else if(requestCode == REQUEST_CODE_DELETE_CART){
             if(resultCode == RESULT_OK){
-                refreshCartMenuList();
+                refreshCart(1);
             }
         }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
             if(resultCode == RESULT_OK){
@@ -310,6 +308,17 @@ public class MainActivity extends AppCompatActivity
                 adapter.notifyDataSetChanged();
             }
         }
+    }
+
+    /**
+     * 카트 추가, 수정, 삭제 시 카트를 갱신한다.
+     * @param cartId
+     */
+    private void refreshCart(long cartId) {
+        Cart cart = cartService.findOneCartByCartId(cartId);
+        itemListView.setTag(R.string.key_cartId, cartId);
+        refreshCartMenuList();
+        refreshCartItems(cart);
     }
 
     /**
@@ -457,7 +466,7 @@ public class MainActivity extends AppCompatActivity
             long cartId = (long) itemListView.getTag(R.string.key_cartId);
 
             if(itemText.isEmpty()){
-                makeText(context, R.string.toast_no_input_item, LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.toast_no_input_item, LENGTH_SHORT).show();
             }else{
                 // max cartItem ID를 조회한다.
                 long maxCartItemId = cartItemService.findMaxCartItemId();

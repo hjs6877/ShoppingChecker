@@ -3,6 +3,9 @@ package com.soom.shoppingchecker;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,9 +47,16 @@ public class CartCreateActivity extends AppCompatActivity {
      * 화면에 표시되는 뷰에 대한 초기화 작업을 진행한다.
      */
     private void initViews(){
+
         editCreateModifyCartText = (EditText) findViewById(R.id.editCreateModifyCartText);
         buttonCreateModifyCart = (Button) findViewById(R.id.buttonCreateModifyCart);
         buttonCreateModifyCart.setOnClickListener(new CartTextCreateButtonClickListener());
+
+        // 공백일 경우 disable 처리
+        if(editCreateModifyCartText.getEditableText().toString().isEmpty())
+            buttonCreateModifyCart.setEnabled(false);
+
+        editCreateModifyCartText.addTextChangedListener(new CartTextChangedListener());
 
         buttonCloseCreateCart = (Button) findViewById(R.id.buttonCloseCreateCart);
         buttonCloseCreateCart.setOnClickListener(new CartCreateCloseButtonClickListener());
@@ -65,6 +75,26 @@ public class CartCreateActivity extends AppCompatActivity {
 
     }
 
+    private class CartTextChangedListener implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//            Log.d("CartCreateActivity", "beforeTextChanged: " + s + "-" + start + "-" + count + "-" + after);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+//            Log.d("CartCreateActivity", "onTextChanged: " + s + "-" + start + "-" + before + "-" + count);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            boolean shouldEnableButtonCreateModifyCart;
+            shouldEnableButtonCreateModifyCart = s.toString().isEmpty() ? false : true;
+
+            buttonCreateModifyCart.setEnabled(shouldEnableButtonCreateModifyCart);
+        }
+    }
     /**
      * 쇼핑 목록(카트) 생성 및 수정 버튼 클릭 리스너
      */

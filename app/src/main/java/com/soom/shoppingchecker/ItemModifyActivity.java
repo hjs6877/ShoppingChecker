@@ -3,9 +3,13 @@ package com.soom.shoppingchecker;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
@@ -14,6 +18,8 @@ import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
 
 import io.realm.Realm;
+
+import static android.widget.Toast.LENGTH_SHORT;
 
 
 /**
@@ -49,12 +55,33 @@ public class ItemModifyActivity extends AppCompatActivity {
         editModifyItemText = (EditText) findViewById(R.id.editModifyItemText);
         editModifyItemText.setText(itemText);
         editModifyItemText.setSelection(editModifyItemText.length());
-
+        editModifyItemText.addTextChangedListener(new CartItemTextChangedListener());
         buttonModifyItem = (Button) findViewById(R.id.buttonModifyItem);
         buttonModifyItem.setOnClickListener(new ItemTextModifyButtonClickListener());
 
         buttonCloseModifyItem = (Button) findViewById(R.id.buttonCloseModifyItem);
         buttonCloseModifyItem.setOnClickListener(new ItemModifyCloseButtonClickListener());
+    }
+
+    private class CartItemTextChangedListener implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//            Log.d("ItemModifyActivity", "beforeTextChanged: " + s + "-" + start + "-" + count + "-" + after);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+//            Log.d("ItemModifyActivity", "onTextChanged: " + s + "-" + start + "-" + before + "-" + count);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            boolean shouldEnableButtonCreateModifyCart;
+            shouldEnableButtonCreateModifyCart = s.toString().isEmpty() ? false : true;
+
+            buttonModifyItem.setEnabled(shouldEnableButtonCreateModifyCart);
+        }
     }
 
     /**
@@ -72,10 +99,13 @@ public class ItemModifyActivity extends AppCompatActivity {
         private void updateCartItem(){
             String modifiedItemText = editModifyItemText.getEditableText().toString();
 
-            Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
-            realm.beginTransaction();
-            cart.getCartItems().get(0).setItemText(modifiedItemText);
-            realm.commitTransaction();
+            if(!modifiedItemText.isEmpty()){
+                Cart cart = realm.where(Cart.class).equalTo("cartItems.cartItemId", cartItemId).findFirst();
+                realm.beginTransaction();
+                cart.getCartItems().get(0).setItemText(modifiedItemText);
+                realm.commitTransaction();
+            }
+
         }
 
         /**
