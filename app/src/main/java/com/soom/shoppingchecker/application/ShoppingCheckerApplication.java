@@ -32,9 +32,9 @@ public class ShoppingCheckerApplication extends Application {
         // 디폴트 쇼핑 리스트 생성.
         Realm realm = Realm.getDefaultInstance();
         RealmQuery<Cart> query = realm.where(Cart.class);
-        RealmResults<Cart> results = query.equalTo("cartId", 1).findAll();
+        Cart defaultCart = query.equalTo("cartId", 1).findFirst();
 
-        if(results.size() == 0){
+        if(defaultCart == null){
             final Cart cart = new Cart(1, "Common", new Date(), new Date());
             realm.executeTransaction(new Realm.Transaction(){
                 @Override

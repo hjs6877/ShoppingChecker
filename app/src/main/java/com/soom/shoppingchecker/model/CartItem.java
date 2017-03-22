@@ -89,9 +89,9 @@ public class CartItem extends RealmObject implements Serializable{
         if (getClass() != obj.getClass())
             return false;
 
-        CartItem cart = (CartItem) obj;
+        CartItem cartItem = (CartItem) obj;
 
-        if(cartItemId == cart.getCartItemId())
+        if(cartItemId == cartItem.getCartItemId())
             return true;
 
         return false;

@@ -196,6 +196,7 @@ public class MainActivity extends AppCompatActivity
 
 
                 buttonDeleteCart.setOnClickListener(new CartDeleteClickListener(cartId));
+
             }
 
             menuItem.setIcon(R.drawable.ic_shopping_basket);
@@ -253,20 +254,6 @@ public class MainActivity extends AppCompatActivity
             Cart cart = cartService.findOneCartByCartId(id);
             itemListView.setTag(R.string.key_cartId, cart.getCartId());
             refreshCartItems(cart);
-        }else{
-//            if (id == R.id.nav_camera) {
-//                // Handle the camera action
-//            } else if (id == R.id.nav_gallery) {
-//
-//            } else if (id == R.id.nav_slideshow) {
-//
-//            } else if (id == R.id.nav_manage) {
-//
-//            } else if (id == R.id.nav_share) {
-//
-//            } else if (id == R.id.nav_send) {
-//
-//            }
         }
 
         initSelectedCartMenuColor();
