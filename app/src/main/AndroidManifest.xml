@@ -26,7 +26,11 @@
         <activity
             android:name=".CartCreateActivity"
             android:theme="@style/Theme.MyDialog" />
-        <activity android:name=".CartDeleteActivity"
+        <activity
+            android:name=".CartDeleteActivity"
+            android:theme="@style/Theme.MyDialog" />
+        <activity
+            android:name=".ItemCopyActivity"
             android:theme="@style/Theme.MyDialog" />
     </application>
 

@@ -23,10 +23,10 @@
         android:layout_height="wrap_content">
 
         <Button
-            android:id="@+id/itemBookmarkButton"
+            android:id="@+id/itemCopyButton"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:background="@drawable/ic_unbookmark"
+            android:background="@xml/button_copy_selector"
             android:layout_alignParentRight="true"
             android:layout_marginTop="2dp"
             android:layout_marginRight="5dp"/>
@@ -36,7 +36,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:background="@xml/button_modify_selector"
-            android:layout_toLeftOf="@+id/itemBookmarkButton"
+            android:layout_toLeftOf="@+id/itemCopyButton"
             android:layout_marginTop="2dp"
             android:layout_marginRight="5dp"/>
 

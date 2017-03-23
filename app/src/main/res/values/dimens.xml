@@ -10,4 +10,8 @@
     <dimen name="button_width_cart_modify">120dp</dimen>
     <dimen name="button_height_cart_modify">30dp</dimen>
     <dimen name="listview_buttons_margin">10dp</dimen>
+    <dimen name="common_popup_padding">10dp</dimen>
+    <dimen name="common_between_widget_left_margin">5dp</dimen>
+    <dimen name="common_between_layout_top_margin">10dp</dimen>
+    <dimen name="common_between_layout_bottom_margin">10dp</dimen>
 </resources>

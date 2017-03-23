@@ -17,6 +17,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import com.soom.shoppingchecker.ItemCopyActivity;
 import com.soom.shoppingchecker.ItemModifyActivity;
 import com.soom.shoppingchecker.R;
 import com.soom.shoppingchecker.database.DBController;
@@ -43,6 +44,7 @@ import io.realm.Realm;
 
 public class CartItemListAdapter extends BaseAdapter {
     public static final int REQUEST_CODE_MODIFY_ITEM = 2001;
+    public static final int REQUEST_CODE_COPY_ITEM = 2002;
     private Realm realm = Realm.getDefaultInstance();
 
     /**
@@ -53,7 +55,7 @@ public class CartItemListAdapter extends BaseAdapter {
         TextView itemTextView;
         Button itemPurchasedButton;
         Button itemModifyButton;
-        Button itemBookmarkButton;
+        Button itemCopyButton;
     }
     private List<CartItem> cartItemList;
     private Map<Long, CartItem> checkedItemMap;
@@ -163,7 +165,7 @@ public class CartItemListAdapter extends BaseAdapter {
             viewHolder.itemTextView = (TextView) view.findViewById(R.id.itemText);
             viewHolder.itemPurchasedButton = (Button) view.findViewById(R.id.itemPurchasedButton);
             viewHolder.itemModifyButton = (Button) view.findViewById(R.id.itemModifyButton);
-            viewHolder.itemBookmarkButton = (Button) view.findViewById(R.id.itemBookmarkButton);
+            viewHolder.itemCopyButton = (Button) view.findViewById(R.id.itemCopyButton);
 
             view.setTag(viewHolder);
         }else{
@@ -184,7 +186,7 @@ public class CartItemListAdapter extends BaseAdapter {
         setItemTextView(viewHolder, position);
         setItemPurchasedButton(viewHolder, position);
         setItemModifyButton(viewHolder, position);
-        setItemBookmarkButton(viewHolder, position);
+        setItemCopyButton(viewHolder, position);
     }
 
     private void setItemPurchasedButton(ViewHolder viewHolder, int position) {
@@ -199,13 +201,8 @@ public class CartItemListAdapter extends BaseAdapter {
         viewHolder.itemModifyButton.setOnClickListener(new ItemModifyButtonClickListener(position));
     }
 
-    private void setItemBookmarkButton(ViewHolder viewHolder, int position) {
-        CartItem cartItem = getItem(position);
-        int buttonImage = getBookmarkButtonImage(cartItem);
-        viewHolder.itemBookmarkButton.setBackgroundResource(buttonImage);
-
-
-        viewHolder.itemBookmarkButton.setOnClickListener(new ItemBookmarkButtonClickListener(viewHolder, position));
+    private void setItemCopyButton(ViewHolder viewHolder, int position) {
+        viewHolder.itemCopyButton.setOnClickListener(new ItemCopyButtonClickListener(viewHolder, position));
     }
 
     private void setItemTextView(ViewHolder viewHolder, int position) {
@@ -227,11 +224,6 @@ public class CartItemListAdapter extends BaseAdapter {
 
     private int getPurchasedButtonImage(CartItem cartItem) {
         return cartItem.isPurchased() ? R.drawable.ic_purchased_item : R.drawable.ic_unpurchased_item;
-    }
-
-    // TODO 구현 필요.
-    private int getBookmarkButtonImage(CartItem cartItem) {
-        return R.drawable.ic_unbookmark;
     }
 
     private boolean isChecked(CartItem cartItem) {
@@ -351,19 +343,25 @@ public class CartItemListAdapter extends BaseAdapter {
     }
 
     // TODO 구현 필요
-    class ItemBookmarkButtonClickListener implements View.OnClickListener{
+    class ItemCopyButtonClickListener implements View.OnClickListener{
 
         private ViewHolder viewHolder;
         private int position;
 
-        public ItemBookmarkButtonClickListener(ViewHolder viewHolder, int position){
+        public ItemCopyButtonClickListener(ViewHolder viewHolder, int position){
             this.viewHolder = viewHolder;
             this.position = position;
         }
 
         @Override
         public void onClick(View v) {
-            Log.d("CartItemListAdapter", "## push the bookmark button.");
+            Log.d("CartItemListAdapter", "## push an item copy button.");
+            CartItem cartItem = getItem(position);
+
+            Intent intent = new Intent(context, ItemCopyActivity.class);
+            intent.putExtra("cartItemId", cartItem.getCartItemId());
+            intent.putExtra("itemText", cartItem.getItemText());
+            ((Activity)context).startActivityForResult(intent, REQUEST_CODE_COPY_ITEM);
         }
     }
 }
