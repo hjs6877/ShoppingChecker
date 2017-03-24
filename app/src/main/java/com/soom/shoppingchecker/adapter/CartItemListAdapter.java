@@ -212,7 +212,7 @@ public class CartItemListAdapter extends BaseAdapter {
         if(isPurchased(cartItem))
             viewHolder.itemTextView.setTextColor(ContextCompat.getColor(context, R.color.color_purchased_item_text));
         else
-            viewHolder.itemTextView.setTextColor(ContextCompat.getColor(context, R.color.color_unpurchased_item_text));
+            viewHolder.itemTextView.setTextColor(ContextCompat.getColor(context, R.color.color_black));
     }
 
     private void setItemCheckBox(ViewHolder viewHolder, int position) {
@@ -302,7 +302,7 @@ public class CartItemListAdapter extends BaseAdapter {
             if(cartItem.isPurchased()){
                 purchasedStauts = false;
                 buttonImage = R.drawable.ic_unpurchased_item;
-                buttonColor = R.color.color_unpurchased_item_text;
+                buttonColor = R.color.color_black;
             }else{
                 purchasedStauts = true;
                 buttonImage = R.drawable.ic_purchased_item;
