@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     public static final int REQUEST_CODE_MODIFY_CART = 1002;
     public static final int REQUEST_CODE_DELETE_CART = 1003;
     public static final int REQUEST_CODE_MODIFY_ITEM = 2001;
+    public static final int REQUEST_CODE_ADD_CART_FROM_ITEM_COPY = 3001;
     public static final int CART_MODE_CREATE = 1;
     public static final int CART_MODE_MODIFY = 2;
 
@@ -148,8 +149,8 @@ public class MainActivity extends AppCompatActivity
         itemListView = (ListView) findViewById(R.id.itemListView);
 
         // 아이템을 추가 및 삭제할 때 cartId가 필요.
-        itemListView.setTag(R.string.key_cartId, defaultCart.getCartId());
         adapter = new CartItemListAdapter(context, defaultCart.getCartItems());
+        adapter.setCurrentCartId(defaultCart.getCartId());
         itemListView.setAdapter(adapter);
 
         // 아이템 입력을 위한 이벤트 리스너 등록.
@@ -252,7 +253,7 @@ public class MainActivity extends AppCompatActivity
         if(groupId == R.id.cart_menu_group_id){
             // DB에서 id에 해당하는 cart를 조회해서 listview를 갱신한다.
             Cart cart = cartService.findOneCartByCartId(id);
-            itemListView.setTag(R.string.key_cartId, cart.getCartId());
+            adapter.setCurrentCartId(cart.getCartId());
             refreshCartItems(cart);
         }
 
@@ -279,6 +280,11 @@ public class MainActivity extends AppCompatActivity
                 long cartId = data.getLongExtra("cartId", 0L);
                 refreshCart(cartId);
             }
+        }else if(requestCode == REQUEST_CODE_ADD_CART_FROM_ITEM_COPY){
+            if(requestCode == RESULT_OK){
+                refreshCartMenuList();
+                Toast.makeText(context, R.string.toast_copied_item, Toast.LENGTH_SHORT).show();
+            }
         }else if(requestCode == REQUEST_CODE_DELETE_CART){
             if(resultCode == RESULT_OK){
                 refreshCart(1);
@@ -303,7 +309,7 @@ public class MainActivity extends AppCompatActivity
      */
     private void refreshCart(long cartId) {
         Cart cart = cartService.findOneCartByCartId(cartId);
-        itemListView.setTag(R.string.key_cartId, cartId);
+        adapter.setCurrentCartId(cartId);
         refreshCartMenuList();
         refreshCartItems(cart);
     }
@@ -338,7 +344,7 @@ public class MainActivity extends AppCompatActivity
         SubMenu cartSubmenu = cartMenuItem.getSubMenu();
         for(int i = 0; i < cartSubmenu.size(); i++){
             MenuItem cartSubMenuItem = cartSubmenu.getItem(i);
-            long cartId = (long) itemListView.getTag(R.string.key_cartId);
+            long cartId = adapter.getCurrentCartId();
             if(cartId == cartSubMenuItem.getItemId()){
                 cartSubMenuItem.setChecked(true);
             }else{
@@ -369,7 +375,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         realm.beginTransaction();
-        Cart cart = cartService.findOneCartByCartId((Long) itemListView.getTag(R.string.key_cartId));
+        Cart cart = cartService.findOneCartByCartId(adapter.getCurrentCartId());
         List<CartItem> cartItems = cart.getCartItems();
         Iterator<CartItem> iter = cartItems.iterator();
 
@@ -450,7 +456,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View v) {
             String itemText = editItemText.getEditableText().toString();
-            long cartId = (long) itemListView.getTag(R.string.key_cartId);
+            long cartId = adapter.getCurrentCartId();
 
             if(itemText.isEmpty()){
                 Toast.makeText(context, R.string.toast_no_input_item, LENGTH_SHORT).show();

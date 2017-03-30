@@ -21,5 +21,6 @@
     <string name="toast_no_input_item">Input your item.</string>
     <string name="toast_no_delete_item">Please, choose items to delete.</string>
     <string name="toast_deleted_item">Items was deleted!</string>
+    <string name="toast_copied_item">Copied the item.</string>
     <string name="txt_to">To:</string>
 </resources>

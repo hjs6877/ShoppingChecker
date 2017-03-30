@@ -15,6 +15,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.soom.shoppingchecker.ItemCopyActivity;
@@ -61,12 +62,21 @@ public class CartItemListAdapter extends BaseAdapter {
     private Map<Long, CartItem> checkedItemMap;
     private LayoutInflater inflater;
     private Context context;
+    private long currentCartId;
 
     public CartItemListAdapter(Context context, List<CartItem> cartItemList) {
         this.context = context;
         inflater = LayoutInflater.from(context);
         this.cartItemList = cartItemList;
         checkedItemMap = new HashMap<>();
+    }
+
+    public long getCurrentCartId() {
+        return currentCartId;
+    }
+
+    public void setCurrentCartId(long currentCartId) {
+        this.currentCartId = currentCartId;
     }
 
     public void setCartItemList(List<CartItem> cartItemList) {
@@ -202,7 +212,7 @@ public class CartItemListAdapter extends BaseAdapter {
     }
 
     private void setItemCopyButton(ViewHolder viewHolder, int position) {
-        viewHolder.itemCopyButton.setOnClickListener(new ItemCopyButtonClickListener(viewHolder, position));
+        viewHolder.itemCopyButton.setOnClickListener(new ItemCopyButtonClickListener(position));
     }
 
     private void setItemTextView(ViewHolder viewHolder, int position) {
@@ -344,12 +354,9 @@ public class CartItemListAdapter extends BaseAdapter {
 
     // TODO 구현 필요
     class ItemCopyButtonClickListener implements View.OnClickListener{
-
-        private ViewHolder viewHolder;
         private int position;
 
-        public ItemCopyButtonClickListener(ViewHolder viewHolder, int position){
-            this.viewHolder = viewHolder;
+        public ItemCopyButtonClickListener(int position){
             this.position = position;
         }
 
@@ -359,6 +366,7 @@ public class CartItemListAdapter extends BaseAdapter {
             CartItem cartItem = getItem(position);
 
             Intent intent = new Intent(context, ItemCopyActivity.class);
+            intent.putExtra("currentCartId", CartItemListAdapter.this.getCurrentCartId());
             intent.putExtra("cartItemId", cartItem.getCartItemId());
             intent.putExtra("itemText", cartItem.getItemText());
             ((Activity)context).startActivityForResult(intent, REQUEST_CODE_COPY_ITEM);

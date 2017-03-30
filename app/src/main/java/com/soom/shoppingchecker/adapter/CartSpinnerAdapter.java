@@ -27,6 +27,9 @@ public class CartSpinnerAdapter extends BaseAdapter {
         inflater = LayoutInflater.from(context);
     }
 
+    public void setCartList(List<Cart> cartList){
+        this.cartList = cartList;
+    }
     @Override
     public int getCount() {
         return cartList.size();
@@ -46,6 +49,7 @@ public class CartSpinnerAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         Cart cart = cartList.get(position);
         convertView = inflater.inflate(R.layout.cart_spinner_layout, null);
+        convertView.setTag(cart);
         TextView txtViewCartName = (TextView) convertView.findViewById(R.id.txtCartNameForSpinner);
         txtViewCartName.setText(cart.getCartName());
         return convertView;
