@@ -281,9 +281,10 @@ public class MainActivity extends AppCompatActivity
                 refreshCart(cartId);
             }
         }else if(requestCode == REQUEST_CODE_ADD_CART_FROM_ITEM_COPY){
-            if(requestCode == RESULT_OK){
+            if(resultCode == RESULT_OK){
                 refreshCartMenuList();
                 Toast.makeText(context, R.string.toast_copied_item, Toast.LENGTH_SHORT).show();
+                Log.d("MainActivity", String.valueOf(R.string.toast_copied_item));
             }
         }else if(requestCode == REQUEST_CODE_DELETE_CART){
             if(resultCode == RESULT_OK){
@@ -461,28 +462,14 @@ public class MainActivity extends AppCompatActivity
             if(itemText.isEmpty()){
                 Toast.makeText(context, R.string.toast_no_input_item, LENGTH_SHORT).show();
             }else{
-                // max cartItem ID를 조회한다.
-                long maxCartItemId = cartItemService.findMaxCartItemId();
 
-                long cartItemId = maxCartItemId + 1;
+                long cartItemId = cartItemService.getNewCartItemId();
 
-                insertItem(cartId, cartItemId, itemText);
+                cartItemService.insertItem(cartId, cartItemId, itemText);
                 refreshCartItems(cartId);
                 setEmptyItemTxt();
             }
 
-        }
-
-        private Cart insertItem(long cartId, long cartItemId, String itemText) {
-            realm.beginTransaction();
-            Cart cart = cartService.findOneCartByCartId(cartId);
-
-
-            CartItem cartItem = new CartItem(cartItemId, itemText, false, false, new Date(), new Date());
-            // 1:N 관계에서 자식 객체는 Realm Object로 객체화 하지 않아도 됨.
-            cart.getCartItems().add(cartItem);
-            realm.commitTransaction();
-            return cart;
         }
 
         private void refreshCartItems(long cartId) {

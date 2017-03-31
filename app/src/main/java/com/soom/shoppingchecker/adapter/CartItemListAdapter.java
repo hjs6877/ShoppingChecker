@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.soom.shoppingchecker.ItemCopyActivity;
 import com.soom.shoppingchecker.ItemModifyActivity;
+import com.soom.shoppingchecker.MainActivity;
 import com.soom.shoppingchecker.R;
 import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
@@ -352,7 +353,6 @@ public class CartItemListAdapter extends BaseAdapter {
         }
     }
 
-    // TODO 구현 필요
     class ItemCopyButtonClickListener implements View.OnClickListener{
         private int position;
 
@@ -369,7 +369,7 @@ public class CartItemListAdapter extends BaseAdapter {
             intent.putExtra("currentCartId", CartItemListAdapter.this.getCurrentCartId());
             intent.putExtra("cartItemId", cartItem.getCartItemId());
             intent.putExtra("itemText", cartItem.getItemText());
-            ((Activity)context).startActivityForResult(intent, REQUEST_CODE_COPY_ITEM);
+            ((Activity)context).startActivityForResult(intent, MainActivity.REQUEST_CODE_ADD_CART_FROM_ITEM_COPY);
         }
     }
 }

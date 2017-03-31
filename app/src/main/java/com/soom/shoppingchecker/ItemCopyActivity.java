@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.soom.shoppingchecker.adapter.CartSpinnerAdapter;
 import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
+import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.service.CartService;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class ItemCopyActivity extends AppCompatActivity {
     private List<Cart> cartList;
 
     private long currentCartId;
-    private long cartItemId;
+    private long selectedCartItemId;
     private String itemText;
     private long selectedCartId;
 
@@ -41,6 +42,7 @@ public class ItemCopyActivity extends AppCompatActivity {
     private Spinner spinnerCart;
     private EditText editTextCartName;
     private Button buttonAddCart;
+    private Button buttonCopyCart;
     private Button buttonCloseCopyCart;
 
     private CartService cartService;
@@ -63,7 +65,7 @@ public class ItemCopyActivity extends AppCompatActivity {
     private void initViews() {
         Intent intent = getIntent();
         currentCartId = intent.getLongExtra("currentCartId", 0);
-        cartItemId = intent.getLongExtra("cartItemId", 0L);
+        selectedCartItemId = intent.getLongExtra("cartItemId", 0L);
         itemText = intent.getStringExtra("itemText");
 
         txtCartName = (TextView) findViewById(R.id.txtCartName);
@@ -83,8 +85,10 @@ public class ItemCopyActivity extends AppCompatActivity {
         editTextCartName = (EditText) findViewById(R.id.editTextCartName);
         buttonAddCart = (Button) findViewById(R.id.buttonAddCart);
         buttonAddCart.setOnClickListener(new OnCartAddClickListener());
+        buttonCopyCart = (Button) findViewById(R.id.buttonCopyCart);
+        buttonCopyCart.setOnClickListener(new OnItemCopyButtonClickListener(new CartItemService()));
         buttonCloseCopyCart = (Button) findViewById(R.id.buttonCloseCopyCart);
-        buttonCloseCopyCart.setOnClickListener(new ItemCopyCloseButtonClickListener());
+        buttonCloseCopyCart.setOnClickListener(new OnItemCopyCloseButtonClickListener());
     }
 
 
@@ -130,17 +134,9 @@ public class ItemCopyActivity extends AppCompatActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
             Log.d("ItemCopyActivity", "selected Cart from cart spinner.");
-            
+
             Cart selectedCart = (Cart) view.getTag();
             selectedCartId = selectedCart.getCartId();
-
-            // TODO 아래 코드는 [Copy] 버튼 클릭했을때 해야 될 액션임.
-            Cart sourceCart = cartService.findOneCartByCartId(currentCartId);
-//            CartItem sourceCartItem = TODO 루프 돌면서 sourceCartItem을 찾아야 됨.
-            Cart targetCart = cartService.findOneCartByCartId(selectedCartId);
-//            targetCart.getCartItems().add(sourceCartItem);
-
-
         }
 
         @Override
@@ -150,14 +146,47 @@ public class ItemCopyActivity extends AppCompatActivity {
     }
 
     /**
+     * 해당 카트로 아이템 복사.
+     */
+    private class OnItemCopyButtonClickListener implements View.OnClickListener {
+        private CartItemService cartItemService;
+
+        public OnItemCopyButtonClickListener(CartItemService cartItemService) {
+            this.cartItemService = cartItemService;
+        }
+
+        @Override
+        public void onClick(View v) {
+            Cart sourceCart = cartService.findOneCartByCartId(currentCartId);
+            for(CartItem sourceCartItem : sourceCart.getCartItems()){
+                if(selectedCartItemId == sourceCartItem.getCartItemId()){
+                    long cartItemId = cartItemService.getNewCartItemId();
+                    cartItemService.insertItem(selectedCartId, cartItemId, sourceCartItem.getItemText());
+                    Log.d("ItemCopyActivity", "Copied a cartItem from " + sourceCart.getCartName());
+                    break;
+                }
+            }
+
+            setResultData();
+            finish();
+        }
+
+        private void setResultData(){
+            Intent resultIntent = new Intent();
+            setResult(RESULT_OK, resultIntent);
+        }
+    }
+
+    /**
      * 닫기 버튼 클릭 리스너
      */
-    private class ItemCopyCloseButtonClickListener implements View.OnClickListener {
+    private class OnItemCopyCloseButtonClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             finish();
         }
     }
+
 
 
 }

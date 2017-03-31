@@ -8,6 +8,7 @@ import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
@@ -36,6 +37,24 @@ public class CartItemService {
         }
 
         return maxCartItemId;
+    }
+
+    public long getNewCartItemId(){
+        long maxCartItemId = findMaxCartItemId();
+
+        return maxCartItemId + 1;
+    }
+
+    public Cart insertItem(long cartId, long cartItemId, String itemText) {
+        realm.beginTransaction();
+        Cart cart = cartService.findOneCartByCartId(cartId);
+
+
+        CartItem cartItem = new CartItem(cartItemId, itemText, false, false, new Date(), new Date());
+        // 1:N 관계에서 자식 객체는 Realm Object로 객체화 하지 않아도 됨.
+        cart.getCartItems().add(cartItem);
+        realm.commitTransaction();
+        return cart;
     }
 
     private long getMaxCartItemIdInCart(Cart cart) {
