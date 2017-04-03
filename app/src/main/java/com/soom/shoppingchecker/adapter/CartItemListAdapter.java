@@ -112,6 +112,10 @@ public class CartItemListAdapter extends BaseAdapter {
         this.checkedItemMap.clear();
     }
 
+    public void removeItem(int position){
+        cartItemList.remove(position);
+    }
+
     /**
      * cartItemList에서 선택한 아이템들 제거
      *

@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.soom.shoppingchecker.adapter.CartItemListAdapter;
 import com.soom.shoppingchecker.comparator.CartItemComparator;
+import com.soom.shoppingchecker.listener.SwipeDismissListViewTouchListener;
 import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
 import com.soom.shoppingchecker.service.CartItemService;
@@ -153,6 +154,36 @@ public class MainActivity extends AppCompatActivity
         adapter.setCurrentCartId(defaultCart.getCartId());
         itemListView.setAdapter(adapter);
 
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(itemListView,
+            new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                @Override
+                public boolean canDismiss(int position) {
+                    return true;
+                }
+
+                @Override
+                public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                    realm.beginTransaction();
+                    long currentCartId = adapter.getCurrentCartId();
+
+                    for (int position : reverseSortedPositions) {
+                        CartItem removedCartItem = adapter.getItem(position);
+
+                        // listview의 카트 아이템을 삭제.
+                        adapter.removeItem(position);
+
+                        cartItemService.deleteCartItem(currentCartId, removedCartItem);
+                    }
+
+                    adapter.notifyDataSetChanged();
+                    realm.commitTransaction();
+
+                    setEmptyItemTxt();
+                }
+        });
+        itemListView.setOnTouchListener(touchListener);
+        itemListView.setOnScrollListener(touchListener.makeScrollListener());
+
         // 아이템 입력을 위한 이벤트 리스너 등록.
         editItemText = (EditText) findViewById(R.id.editItemText);
         buttonAdd = (Button) findViewById(R.id.buttonAdd);
@@ -222,6 +253,8 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        MenuItem menuItem = menu.findItem(R.id.action_item_delete);
+        menuItem.setVisible(false);
         return true;
     }
 
@@ -236,7 +269,7 @@ public class MainActivity extends AppCompatActivity
              * - item 갱신
              */
             case R.id.action_item_delete:
-                deleteCartItem(checkedItemMap);
+                deleteCartItems(checkedItemMap);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -369,25 +402,15 @@ public class MainActivity extends AppCompatActivity
      * cart item id에 해당하는 cart item을 삭제한다.
      * @param checkedItemMap
      */
-    private void deleteCartItem(Map<Long, CartItem> checkedItemMap) {
+    private void deleteCartItems(Map<Long, CartItem> checkedItemMap) {
         if(checkedItemMap.size() == 0) {
             makeText(this, R.string.toast_no_delete_item, LENGTH_SHORT).show();
             return;
         }
 
         realm.beginTransaction();
-        Cart cart = cartService.findOneCartByCartId(adapter.getCurrentCartId());
-        List<CartItem> cartItems = cart.getCartItems();
-        Iterator<CartItem> iter = cartItems.iterator();
-
-        // 1:N 관계에서 N쪽 자식을 삭제하기 위해서는 Iterator를 사용해야 함.
-        while(iter.hasNext()){
-            CartItem cartItem = iter.next();
-            if(cartItem.equals(checkedItemMap.get(cartItem.getCartItemId()))){
-                iter.remove();
-            }
-        }
-
+        long currentCartId = adapter.getCurrentCartId();
+        cartItemService.deleteCartItems(currentCartId, checkedItemMap);
         realm.commitTransaction();
 
         adapter.removeItems(checkedItemMap);
@@ -501,4 +524,5 @@ public class MainActivity extends AppCompatActivity
             startActivityForResult(intent, REQUEST_CODE_ADD_CART);
         }
     }
+
 }

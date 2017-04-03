@@ -9,7 +9,9 @@ import com.soom.shoppingchecker.model.CartItem;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import io.realm.Realm;
 
@@ -55,6 +57,34 @@ public class CartItemService {
         cart.getCartItems().add(cartItem);
         realm.commitTransaction();
         return cart;
+    }
+
+    public void deleteCartItem(long cartId, CartItem removedCartItem){
+        Cart cart = cartService.findOneCartByCartId(cartId);
+        List<CartItem> cartItems = cart.getCartItems();
+        Iterator<CartItem> iter = cartItems.iterator();
+
+        // 1:N 관계에서 N쪽 자식을 삭제하기 위해서는 Iterator를 사용해야 함.
+        while(iter.hasNext()){
+            CartItem cartItem = iter.next();
+            if(cartItem.equals(removedCartItem)){
+                iter.remove();
+            }
+        }
+    }
+
+    public void deleteCartItems(long cartId, Map<Long, CartItem> checkedItemMap){
+        Cart cart = cartService.findOneCartByCartId(cartId);
+        List<CartItem> cartItems = cart.getCartItems();
+        Iterator<CartItem> iter = cartItems.iterator();
+
+        // 1:N 관계에서 N쪽 자식을 삭제하기 위해서는 Iterator를 사용해야 함.
+        while(iter.hasNext()){
+            CartItem cartItem = iter.next();
+            if(cartItem.equals(checkedItemMap.get(cartItem.getCartItemId()))){
+                iter.remove();
+            }
+        }
     }
 
     private long getMaxCartItemIdInCart(Cart cart) {
