@@ -6,13 +6,12 @@ package com.soom.shoppingchecker.presenter;
 
 public interface MainContract {
     interface View {
-        void reloadCart();
-        void addCartItems();
+        void refreshCartMenues();
+        void refreshCartItems();
     }
 
     interface Presenter {
         void copyCartItem();
-        void loadCartItems();
         void addCart();
         void addCartItem();
         void findAllCart();
