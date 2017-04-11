@@ -29,6 +29,8 @@ import com.soom.shoppingchecker.comparator.CartItemComparator;
 import com.soom.shoppingchecker.listener.SwipeDismissListViewTouchListener;
 import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
+import com.soom.shoppingchecker.presenter.MainContract;
+import com.soom.shoppingchecker.presenter.MainPresenter;
 import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.service.CartService;
 
@@ -43,7 +45,7 @@ import io.realm.Realm;
 import static android.widget.Toast.*;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements MainContract.View, NavigationView.OnNavigationItemSelectedListener {
     private NavigationView navigationView;
     public static final String TAG = "MainActivity";
 
@@ -68,11 +70,27 @@ public class MainActivity extends AppCompatActivity
     private Realm realm = Realm.getDefaultInstance();
     private LayoutInflater inflater;
     private Context context;
+    private MainPresenter mainPresenter;
 
     public MainActivity(){
         this.context = this;
         cartService = new CartService();
         cartItemService = new CartItemService();
+
+        // TODO
+        mainPresenter = new MainPresenter(cartService, cartItemService);
+    }
+
+    @Override
+    public void refreshCartMenues() {
+
+    }
+
+    @Override
+    public void refreshCartItems(Cart cart) {
+        setTitle(cart.getCartName());
+        adapter.setCurrentCartId(cart.getCartId());
+        adapter.setCartItems(cart.getCartItems());
     }
 
     @Override
@@ -135,6 +153,8 @@ public class MainActivity extends AppCompatActivity
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new FloatingActionButtonClickListener(context));
 
+        // TODO
+        mainPresenter.attachView(this);
     }
 
     private void initViews() {
@@ -143,16 +163,19 @@ public class MainActivity extends AppCompatActivity
 
 
         // 디폴트 쇼핑 리스트의 쇼핑 아이템 조회.
-        Cart defaultCart = cartService.findOneCartByCartId(1);
-        setTitle(defaultCart.getCartName());
+        Cart defaultCart = cartService.findOneCartByCartId(1);// TODO remove
+        setTitle(defaultCart.getCartName());// TODO remove
 
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
 
         // 아이템을 추가 및 삭제할 때 cartId가 필요.
-        adapter = new CartItemListAdapter(context, defaultCart.getCartItems());
-        adapter.setCurrentCartId(defaultCart.getCartId());
+        adapter = new CartItemListAdapter(context, defaultCart.getCartItems());// TODO remove 카트 아이템 제거 예정.
+        adapter.setCurrentCartId(defaultCart.getCartId());  // TODO remove
         itemListView.setAdapter(adapter);
+
+        // TODO
+//        mainPresenter.loadCartItems(1);
 
         SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(itemListView,
             new SwipeDismissListViewTouchListener.DismissCallbacks() {
@@ -345,16 +368,16 @@ public class MainActivity extends AppCompatActivity
         Cart cart = cartService.findOneCartByCartId(cartId);
         adapter.setCurrentCartId(cartId);
         refreshCartMenuList();
-        refreshCartItems(cart);
+        refreshCartItemsOld(cart);
     }
 
     /**
      * cart에 해당하는 cart item들을 갱신한다.
      * @param cart
      */
-    private void refreshCartItems(Cart cart) {
+    private void refreshCartItemsOld(Cart cart) {
         setTitle(cart.getCartName());
-        adapter.setCartItemList(cart.getCartItems());
+        adapter.setCartItems(cart.getCartItems());
         adapter.notifyDataSetChanged();
         setEmptyItemTxt();
     }
@@ -418,6 +441,8 @@ public class MainActivity extends AppCompatActivity
 
         setEmptyItemTxt();
     }
+
+
 
     /**
      * 카트 수정 버튼 클릭 리스너
@@ -497,7 +522,7 @@ public class MainActivity extends AppCompatActivity
 
         private void refreshCartItems(long cartId) {
             List<CartItem> cartItems = cartService.findOneCartByCartId(cartId).getCartItems();
-            adapter.setCartItemList(cartItems);
+            adapter.setCartItems(cartItems);
             realm.beginTransaction();
             Collections.sort(cartItems, new CartItemComparator());
             realm.commitTransaction();

@@ -80,7 +80,7 @@ public class CartItemListAdapter extends BaseAdapter {
         this.currentCartId = currentCartId;
     }
 
-    public void setCartItemList(List<CartItem> cartItemList) {
+    public void setCartItems(List<CartItem> cartItemList) {
         this.cartItemList = cartItemList;
     }
 
@@ -135,7 +135,7 @@ public class CartItemListAdapter extends BaseAdapter {
     private void subtractCheckedCartItem(Map<Long, CartItem> checkedItemMap) {
         List<CartItem> checkedCartItemList = new ArrayList<>(checkedItemMap.values());
         Collection<CartItem> removedCartItemList = CollectionUtils.removeAll(cartItemList, checkedCartItemList);
-        setCartItemList((List<CartItem>) removedCartItemList);      // 삭제되고 남은 아이템으로 재할당.
+        setCartItems((List<CartItem>) removedCartItemList);      // 삭제되고 남은 아이템으로 재할당.
     }
 
     /**

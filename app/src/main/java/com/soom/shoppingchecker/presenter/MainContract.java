@@ -1,5 +1,7 @@
 package com.soom.shoppingchecker.presenter;
 
+import com.soom.shoppingchecker.model.Cart;
+
 /**
  * Created by kjs on 2017-04-06.
  */
@@ -7,14 +9,15 @@ package com.soom.shoppingchecker.presenter;
 public interface MainContract {
     interface View {
         void refreshCartMenues();
-        void refreshCartItems();
+        void refreshCartItems(Cart cart);
     }
 
     interface Presenter {
+        void attachView(View view);
         void copyCartItem();
         void addCart();
         void addCartItem();
         void findAllCart();
-        void findCartByCartId();
+        void loadCartItems(long cartId);
     }
 }
