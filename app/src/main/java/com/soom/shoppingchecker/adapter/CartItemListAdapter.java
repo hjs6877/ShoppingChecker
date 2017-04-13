@@ -65,10 +65,9 @@ public class CartItemListAdapter extends BaseAdapter {
     private Context context;
     private long currentCartId;
 
-    public CartItemListAdapter(Context context, List<CartItem> cartItemList) {
+    public CartItemListAdapter(Context context) {
         this.context = context;
         inflater = LayoutInflater.from(context);
-        this.cartItemList = cartItemList;
         checkedItemMap = new HashMap<>();
     }
 
@@ -144,7 +143,7 @@ public class CartItemListAdapter extends BaseAdapter {
      */
     @Override
     public int getCount() {
-        return cartItemList.size();
+        return cartItemList != null ? cartItemList.size() : 0;
     }
 
     @Nullable
