@@ -90,9 +90,23 @@ public class MainActivity extends AppCompatActivity
     // TODO
     @Override
     public void refreshCartItems(Cart cart) {
-        adapter.setCurrentCartId(cart.getCartId());
-        adapter.setCartItems(cart.getCartItems());
+        long cartId = cart.getCartId();
+
         setTitle(cart.getCartName());
+
+        List<CartItem> cartItems = cart.getCartItems();
+        adapter.setCurrentCartId(cartId);
+        adapter.setCartItems(cartItems);
+        realm.beginTransaction();
+        Collections.sort(cartItems, new CartItemComparator());
+        realm.commitTransaction();
+
+        adapter.notifyDataSetChanged();
+
+        // editText의 텍스트 지워서 초기화.
+        editItemText.setText(null);
+
+        setEmptyItemTxt();
     }
 
     @Override
@@ -164,20 +178,14 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        // 디폴트 쇼핑 리스트의 쇼핑 아이템 조회.
-//        Cart defaultCart = cartService.findOneCartByCartId(1);// TODO remove
-//        setTitle(defaultCart.getCartName());// TODO remove
 
         // 리스트뷰에 어댑터 연결.
         itemListView = (ListView) findViewById(R.id.itemListView);
 
         // 아이템을 추가 및 삭제할 때 cartId가 필요.
-        adapter = new CartItemListAdapter(context);// TODO remove 카트 아이템 제거 예정.
-//        adapter.setCurrentCartId(defaultCart.getCartId());  // TODO remove
+        adapter = new CartItemListAdapter(context);
         itemListView.setAdapter(adapter);
 
-        // TODO
-        mainPresenter.loadCartItems(1);
 
         SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(itemListView,
             new SwipeDismissListViewTouchListener.DismissCallbacks() {
@@ -216,9 +224,11 @@ public class MainActivity extends AppCompatActivity
 
         emptyItemTxt = (TextView) findViewById(R.id.emptyItemTxt);
 
-        setEmptyItemTxt();
-
         createShoppingListMenu();
+
+        // TODO
+        mainPresenter.loadCartItems(1);
+
     }
 
     /**
@@ -333,33 +343,33 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-//        if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
-//            if(resultCode == RESULT_OK){
-//                long cartId = data.getLongExtra("cartId", 0L);
-//                refreshCart(cartId);
-//            }
-//        }else if(requestCode == REQUEST_CODE_ADD_CART_FROM_ITEM_COPY){
-//            if(resultCode == RESULT_OK){
-//                refreshCartMenuList();
-//                Toast.makeText(context, R.string.toast_copied_item, Toast.LENGTH_SHORT).show();
-//                Log.d("MainActivity", String.valueOf(R.string.toast_copied_item));
-//            }
-//        }else if(requestCode == REQUEST_CODE_DELETE_CART){
-//            if(resultCode == RESULT_OK){
-//                refreshCart(1);
-//            }
-//        }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
-//            if(resultCode == RESULT_OK){
-//                Log.d("MainActivity", "## Item modified.");
-//                String modifiedItemText = data.getExtras().getString("modifiedItemText");
-//                int position = data.getExtras().getInt("position");
-//
-//                realm.beginTransaction();
-//                adapter.getCartItemList().get(position).setItemText(modifiedItemText);
-//                realm.commitTransaction();
-//                adapter.notifyDataSetChanged();
-//            }
-//        }
+        if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
+            if(resultCode == RESULT_OK){
+                long cartId = data.getLongExtra("cartId", 0L);
+                refreshCart(cartId);
+            }
+        }else if(requestCode == REQUEST_CODE_ADD_CART_FROM_ITEM_COPY){
+            if(resultCode == RESULT_OK){
+                refreshCartMenuList();
+                Toast.makeText(context, R.string.toast_copied_item, Toast.LENGTH_SHORT).show();
+                Log.d("MainActivity", String.valueOf(R.string.toast_copied_item));
+            }
+        }else if(requestCode == REQUEST_CODE_DELETE_CART){
+            if(resultCode == RESULT_OK){
+                refreshCart(1);
+            }
+        }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
+            if(resultCode == RESULT_OK){
+                Log.d("MainActivity", "## Item modified.");
+                String modifiedItemText = data.getExtras().getString("modifiedItemText");
+                int position = data.getExtras().getInt("position");
+
+                realm.beginTransaction();
+                adapter.getCartItemList().get(position).setItemText(modifiedItemText);
+                realm.commitTransaction();
+                adapter.notifyDataSetChanged();
+            }
+        }
     }
 
     /**
@@ -514,10 +524,10 @@ public class MainActivity extends AppCompatActivity
             }else{
 
                 long cartItemId = cartItemService.getNewCartItemId();
-
-                cartItemService.insertItem(cartId, cartItemId, itemText);
-                refreshCartItems(cartId);
-                setEmptyItemTxt();
+                mainPresenter.addCartItem(cartId, cartItemId, itemText);
+//                cartItemService.insertItem(cartId, cartItemId, itemText);
+//                refreshCartItems(cartId);
+//                setEmptyItemTxt();
             }
 
         }

@@ -16,7 +16,7 @@ public interface MainContract {
         void attachView(View view);
         void copyCartItem();
         void addCart();
-        void addCartItem();
+        void addCartItem(long cartId, long cartItemId, String itemText);
         void findAllCart();
         void loadCartItems(long cartId);
     }

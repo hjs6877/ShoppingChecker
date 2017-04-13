@@ -34,8 +34,9 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void addCartItem() {
-
+    public void addCartItem(long cartId, long cartItemId, String itemText) {
+        cartItemService.insertItem(cartId, cartItemId, itemText);
+        loadCartItems(cartId);
     }
 
     @Override
@@ -45,7 +46,7 @@ public class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void loadCartItems(long cartId) {
-        Cart cart = cartService.findOneCartByCartId(1);
+        Cart cart = cartService.findOneCartByCartId(cartId);
         view.refreshCartItems(cart);
     }
 }
