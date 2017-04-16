@@ -83,8 +83,11 @@ public class MainActivity extends AppCompatActivity
 
     // TODO
     @Override
-    public void refreshCartMenues() {
-
+    public void refreshCarts(long cartId) {
+        Cart cart = cartService.findOneCartByCartId(cartId);
+        adapter.setCurrentCartId(cartId);
+        refreshCartMenuList();
+        refreshCartItems(cart);
     }
 
     // TODO
@@ -346,7 +349,7 @@ public class MainActivity extends AppCompatActivity
         if(requestCode == REQUEST_CODE_ADD_CART || requestCode == REQUEST_CODE_MODIFY_CART){
             if(resultCode == RESULT_OK){
                 long cartId = data.getLongExtra("cartId", 0L);
-                refreshCart(cartId);
+                refreshCarts(cartId);
             }
         }else if(requestCode == REQUEST_CODE_ADD_CART_FROM_ITEM_COPY){
             if(resultCode == RESULT_OK){
@@ -524,25 +527,10 @@ public class MainActivity extends AppCompatActivity
             }else{
 
                 long cartItemId = cartItemService.getNewCartItemId();
+                // TODO
                 mainPresenter.addCartItem(cartId, cartItemId, itemText);
-//                cartItemService.insertItem(cartId, cartItemId, itemText);
-//                refreshCartItems(cartId);
-//                setEmptyItemTxt();
             }
 
-        }
-
-        private void refreshCartItems(long cartId) {
-            List<CartItem> cartItems = cartService.findOneCartByCartId(cartId).getCartItems();
-            adapter.setCartItems(cartItems);
-            realm.beginTransaction();
-            Collections.sort(cartItems, new CartItemComparator());
-            realm.commitTransaction();
-
-            adapter.notifyDataSetChanged();
-
-            // editText의 텍스트 지워서 초기화.
-            editItemText.setText(null);
         }
     }
 

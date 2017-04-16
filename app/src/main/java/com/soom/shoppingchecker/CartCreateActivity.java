@@ -15,6 +15,7 @@ import com.soom.shoppingchecker.database.DBController;
 import com.soom.shoppingchecker.database.SQLData;
 import com.soom.shoppingchecker.model.Cart;
 import com.soom.shoppingchecker.model.CartItem;
+import com.soom.shoppingchecker.presenter.MainPresenter;
 import com.soom.shoppingchecker.service.CartItemService;
 import com.soom.shoppingchecker.service.CartService;
 
@@ -27,12 +28,13 @@ public class CartCreateActivity extends AppCompatActivity {
     private EditText editCreateModifyCartText;
     private Button buttonCreateModifyCart;
     private Button buttonCloseCreateCart;
-    private Cart cart;
     private CartService cartService;
+    private MainPresenter mainPresenter;
     private int mode;
     private long cartId;
     public CartCreateActivity() {
         cartService = new CartService();
+        mainPresenter = new MainPresenter(cartService, null);
     }
 
     @Override
@@ -114,23 +116,7 @@ public class CartCreateActivity extends AppCompatActivity {
 
         private void createCart(){
             String cartName = editCreateModifyCartText.getEditableText().toString();
-            /**
-             * - max cartId를 가져온다.
-             * - new cartId = 조회한 max cartId + 1
-             * - 저장.
-             * - 저장되었는지 확인 테스트
-             * - 팝업 액티비티 닫기
-             * - CartItemListAdapter를 통해 저장된 Cart에 해당하는 cart Item을 listviw에 가져와서 표시. TODO
-             *      - 액티비티를 닫을 때, cartId를 응답으로 전달
-             *      - 응답으로 전달 받은 cartId에 해당하는 Cart Item을 조회하여 adapter를 갱신. 기존 arrayList를 clear하고 갱신한다.
-             */
-            if(!cartName.isEmpty()){
-                long maxCartId = cartService.findMaxCartId();
-                long cartId = maxCartId + 1;
-                cart = new Cart(cartId, cartName, new Date(), new Date());
-                cartService.saveCart(cart);
-            }
-
+            cartId = mainPresenter.addCart(cartName);
         }
 
         private void modifyCart(){
@@ -149,7 +135,7 @@ public class CartCreateActivity extends AppCompatActivity {
 
         private void setResultData(){
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("cartId", cart.getCartId());
+            resultIntent.putExtra("cartId", cartId);
             setResult(RESULT_OK, resultIntent);
         }
     }

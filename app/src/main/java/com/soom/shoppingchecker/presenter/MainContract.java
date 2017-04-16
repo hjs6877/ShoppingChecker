@@ -8,14 +8,14 @@ import com.soom.shoppingchecker.model.Cart;
 
 public interface MainContract {
     interface View {
-        void refreshCartMenues();
+        void refreshCarts(long cartId);
         void refreshCartItems(Cart cart);
     }
 
     interface Presenter {
         void attachView(View view);
         void copyCartItem();
-        void addCart();
+        long addCart(String cartName);
         void addCartItem(long cartId, long cartItemId, String itemText);
         void findAllCart();
         void loadCartItems(long cartId);
