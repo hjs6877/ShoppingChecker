@@ -359,7 +359,7 @@ public class MainActivity extends AppCompatActivity
             }
         }else if(requestCode == REQUEST_CODE_DELETE_CART){
             if(resultCode == RESULT_OK){
-                refreshCart(1);
+                refreshCarts(1);
             }
         }else if(requestCode == REQUEST_CODE_MODIFY_ITEM){
             if(resultCode == RESULT_OK){
@@ -373,28 +373,6 @@ public class MainActivity extends AppCompatActivity
                 adapter.notifyDataSetChanged();
             }
         }
-    }
-
-    /**
-     * 카트 추가, 수정, 삭제 시 카트를 갱신한다.
-     * @param cartId
-     */
-    private void refreshCart(long cartId) {
-        Cart cart = cartService.findOneCartByCartId(cartId);
-        adapter.setCurrentCartId(cartId);
-        refreshCartMenuList();
-        refreshCartItemsOld(cart);
-    }
-
-    /**
-     * cart에 해당하는 cart item들을 갱신한다.
-     * @param cart
-     */
-    private void refreshCartItemsOld(Cart cart) {
-        setTitle(cart.getCartName());
-        adapter.setCartItems(cart.getCartItems());
-        adapter.notifyDataSetChanged();
-        setEmptyItemTxt();
     }
 
     /**
